@@ -127,3 +127,18 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Pytorch files
+*.pt
+
+# data
+*.fr
+*.en
+data/
+
+# Loggin file
+*.log
+log/
+
+# Pycharm file
+.idea/

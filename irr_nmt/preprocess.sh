@@ -1,0 +1,1 @@
+python preprocess.py -save_data data/europarl -train_src data/train.fr -train_tgt data/train.en -valid_src data/test.fr -valid_tgt data/test.en
