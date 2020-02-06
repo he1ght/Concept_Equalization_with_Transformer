@@ -249,9 +249,23 @@ def build_model(model_opt, opt, fields, checkpoint):
 
 
 class EqualizingLayer(nn.Module):
-    def __init__(self, input_size, output_size):
+    def __init__(self, input_size, output_size, ce_type=1):
+        # ce_type 0 : Wx+b ( 1 linear )
+        # ce_type 1 : (Wx_1+b_1)x_2+b_2
         super(EqualizingLayer, self).__init__()
-        self.layer = torch.nn.Linear(input_size, output_size)
+        try:
+            if ce_type == 0:
+                self.layer = torch.nn.Linear(input_size, output_size)
+            elif ce_type == 1:
+                hidden_unit = 250
+                self.layer = torch.nn.Sequential()
+                self.layer.add_module("Equalizing Layer 1", torch.nn.Linear(input_size, hidden_unit))
+                self.layer.add_module("Equalizing Layer 2", torch.nn.Linear(hidden_unit, output_size))
+        except Exception:
+            self.layer = torch.nn.Linear(input_size, output_size)
+
+
+
 
     def forward(self, c_s):
         return self.layer(c_s)
