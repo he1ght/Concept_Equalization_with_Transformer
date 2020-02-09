@@ -64,14 +64,14 @@ class NMTModel(nn.Module):
         self.encoder.update_dropout(dropout)
         self.decoder.update_dropout(dropout)
 
+
 def euclidean_distance(inputs, target):
     return torch.sqrt(torch.sum((inputs - target) ** 2))
 
+
 def hamming_distance(inputs, target, eps=1e-3):
-    # from scipy.spatial import distance
-    # distance.hamming(inputs, target)
-    # from scipy.spatial.distance import cdist
-    # return cdist(inputs, target, 'hamming')
-    c = torch.abs(inputs-target) > eps
+    # [n_seq x batch x emb]
+    batch_size = inputs.size(1)
+    c = torch.abs(inputs - target) > eps
     c = torch.sum(c)
-    return c
+    return c / batch_size
