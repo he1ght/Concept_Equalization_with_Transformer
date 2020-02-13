@@ -56,8 +56,10 @@ class NMTModel(nn.Module):
             c_s = torch.sum(memory_bank, 0)
             v_s = self.ce_layer(c_s)
             v_t = torch.sum(dec_out, 0)
-            distance_ex = hamming_distance
-            new_cost = distance_ex(v_s, v_t)
+
+            # CE type 2 : hamming distance
+            # new_cost = euclidean_distance(v_s, v_t)
+            new_cost = hamming_distance(v_s, v_t)
         return dec_out, attns, new_cost
 
     def update_dropout(self, dropout):
@@ -72,6 +74,7 @@ def euclidean_distance(inputs, target):
 def hamming_distance(inputs, target, eps=1e-3):
     # [n_seq x batch x emb]
     batch_size = inputs.size(1)
-    c = torch.abs(inputs - target) > eps
+    # c = torch.abs(inputs - target) > eps
+    c = inputs != target
     c = torch.sum(c)
     return c / batch_size
