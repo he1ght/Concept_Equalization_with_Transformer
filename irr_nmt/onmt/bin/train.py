@@ -85,7 +85,7 @@ def train(opt):
         producer.terminate()
 
     elif nb_gpu == 1:  # case 1 GPU only
-        single_main(opt, 0)
+        single_main(opt, opt.gpu_ranks[0])
     else:   # case only CPU
         single_main(opt, -1)
 
