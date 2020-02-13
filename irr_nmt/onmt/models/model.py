@@ -71,10 +71,13 @@ def euclidean_distance(inputs, target):
     return torch.sqrt(torch.sum((inputs - target) ** 2))
 
 
-def hamming_distance(inputs, target, eps=1e-3):
-    # [n_seq x batch x emb]
-    batch_size = inputs.size(1)
-    # c = torch.abs(inputs - target) > eps
-    c = inputs != target
-    c = torch.sum(c)
-    return c / batch_size
+def hamming_distance(inputs, target, norm=True):
+    # [n_seq x batch x v_dim]
+    v_dim = inputs.size(-1)
+
+    ret = torch.abs(inputs - target)
+    ret = torch.sum(ret, dim=-1)
+    if norm:
+        ret = ret / v_dim
+    ret = torch.mean(ret)
+    return ret

@@ -24,6 +24,10 @@ class Statistics(object):
         self.n_src_words = 0
         self.start_time = time.time()
 
+        # Separate CE loss
+        self.raw_loss = 0
+        self.new_loss = 0
+
     @staticmethod
     def all_gather_stats(stat, max_size=4096):
         """
@@ -79,6 +83,8 @@ class Statistics(object):
 
         """
         self.loss += stat.loss
+        self.raw_loss += stat.raw_loss
+        self.new_loss += stat.new_loss
         self.n_words += stat.n_words
         self.n_correct += stat.n_correct
 
@@ -91,11 +97,11 @@ class Statistics(object):
 
     def xent(self):
         """ compute cross entropy """
-        return self.loss / self.n_words
+        return self.raw_loss / self.n_words
 
     def ppl(self):
         """ compute perplexity """
-        return math.exp(min(self.loss / self.n_words, 100))
+        return math.exp(min(self.raw_loss / self.n_words, 100))
 
     def elapsed_time(self):
         """ compute elapsed time """
@@ -114,12 +120,14 @@ class Statistics(object):
         if num_steps > 0:
             step_fmt = "%s/%5d" % (step_fmt, num_steps)
         logger.info(
-            ("Step %s; acc: %6.2f; ppl: %5.2f; xent: %4.2f; " +
+            ("Step %s; acc: %6.2f; ppl: %5.2f; loss: %4.2f; xent: %4.2f; dist: %4.2f; " +
              "lr: %7.5f; %3.0f/%3.0f tok/s; %6.0f sec")
             % (step_fmt,
                self.accuracy(),
                self.ppl(),
+               self.loss,
                self.xent(),
+               self.new_loss,
                learning_rate,
                self.n_src_words / (t + 1e-5),
                self.n_words / (t + 1e-5),
@@ -129,7 +137,9 @@ class Statistics(object):
     def log_tensorboard(self, prefix, writer, learning_rate, step):
         """ display statistics to tensorboard """
         t = self.elapsed_time()
+        writer.add_scalar(prefix + "/loss", self.loss, step)
         writer.add_scalar(prefix + "/xent", self.xent(), step)
+        writer.add_scalar(prefix + "/ce_loss", self.new_loss, step)
         writer.add_scalar(prefix + "/ppl", self.ppl(), step)
         writer.add_scalar(prefix + "/accuracy", self.accuracy(), step)
         writer.add_scalar(prefix + "/tgtper", self.n_words / t, step)

@@ -161,8 +161,12 @@ class LossComputeBase(nn.Module):
         shard_state = self._make_shard_state(batch, output, trunc_range, attns)
         if shard_size == 0:
             loss, stats = self._compute_loss(batch, **shard_state)
+            stats.raw_loss = loss.clone().item()
             if new_cost is not None:
                 loss += new_cost
+                stats.new_loss = new_cost.clone().item()
+            else:
+                stats.new_loss = 0
             stats.loss = loss.clone().item()
             return loss / float(normalization), stats
         batch_stats = onmt.utils.Statistics()
