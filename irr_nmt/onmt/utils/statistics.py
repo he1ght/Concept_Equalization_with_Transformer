@@ -120,12 +120,12 @@ class Statistics(object):
         if num_steps > 0:
             step_fmt = "%s/%5d" % (step_fmt, num_steps)
         logger.info(
-            ("Step %s; acc: %6.2f; ppl: %5.2f; loss: %4.2f; xent: %4.2f; dist: %4.2f; " +
+            ("Step %s; acc: %6.2f; ppl: %5.2f; xent: %4.2f; dist: %4.2f; " +
              "lr: %7.5f; %3.0f/%3.0f tok/s; %6.0f sec")
             % (step_fmt,
                self.accuracy(),
                self.ppl(),
-               self.loss,
+               # self.loss,
                self.xent(),
                self.new_loss,
                learning_rate,
@@ -137,7 +137,7 @@ class Statistics(object):
     def log_tensorboard(self, prefix, writer, learning_rate, step):
         """ display statistics to tensorboard """
         t = self.elapsed_time()
-        writer.add_scalar(prefix + "/loss", self.loss, step)
+        # writer.add_scalar(prefix + "/loss", self.loss, step)
         writer.add_scalar(prefix + "/xent", self.xent(), step)
         writer.add_scalar(prefix + "/ce_loss", self.new_loss, step)
         writer.add_scalar(prefix + "/ppl", self.ppl(), step)
