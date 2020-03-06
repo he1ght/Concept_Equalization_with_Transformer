@@ -130,6 +130,7 @@ dmypy.json
 
 # Pytorch files
 *.pt
+model/
 
 # data
 *.fr
@@ -142,3 +143,7 @@ log/
 
 # Pycharm file
 .idea/
+
+# Pretrained data
+encoder_emb.txt
+decoder_emb.txt
