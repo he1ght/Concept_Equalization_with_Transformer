@@ -147,3 +147,5 @@ log/
 # Pretrained data
 encoder_emb.txt
 decoder_emb.txt
+*encoder_emb.txt
+*decoder_emb.txt
