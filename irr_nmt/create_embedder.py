@@ -73,24 +73,25 @@ if __name__ == "__main__":
     dec_file_name = 'random_decoder_emb.txt' if opt.type == 'random' else 'bert_decoder_emb.txt'
 
     vecs = np.random.uniform(-1, 1, size=(len(enc_vocab), opt.vec_size)) * 5
-    for v in vecs:
-        with open(enc_file_name, 'w') as f:
-            for word in enc_vocab:
-                line = ""
-                line += word
-                for e in v:
-                    line += " " + str(e)
-                line += "\n"
-                f.write(line)
+    print("Encoder Vectors generated ... ", end="")
+
+    with open(enc_file_name, 'w') as f:
+        for word, v in zip(enc_vocab, vecs):
+            line = ""
+            line += word
+            for e in v:
+                line += " " + str(e)
+            line += "\n"
+            f.write(line)
 
     vecs = np.random.uniform(-1, 1, size=(len(dec_vocab), opt.vec_size)) * 5
-    for v in vecs:
-        with open(dec_file_name, 'w') as f:
-            for word in dec_vocab:
-                line = ""
-                line += word
-                for e in v:
-                    line += " " + str(e)
-                line += "\n"
-                f.write(line)
+    print("Decoder Vectors generated ... ", end="")
+    with open(dec_file_name, 'w') as f:
+        for word, v in zip(dec_vocab, vecs):
+            line = ""
+            line += word
+            for e in v:
+                line += " " + str(e)
+            line += "\n"
+            f.write(line)
 
