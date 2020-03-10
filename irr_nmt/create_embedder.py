@@ -23,6 +23,8 @@ def extractor_opts(parser):
     group.add('-type', default='random',
               choices=['random', 'bert'],
               help=".")
+    group.add('-seed', type=float, default=0,
+              help=".")
 
 
 def _get_parser():
@@ -72,6 +74,7 @@ if __name__ == "__main__":
     enc_file_name = 'random_encoder_emb.txt' if opt.type == 'random' else 'bert_encoder_emb.txt'
     dec_file_name = 'random_decoder_emb.txt' if opt.type == 'random' else 'bert_decoder_emb.txt'
 
+    np.random.seed(opt.seed)
     vecs = np.random.uniform(-1, 1, size=(len(enc_vocab), opt.vec_size)) * 5
     print("Encoder Vectors generated ... ", end="")
 
