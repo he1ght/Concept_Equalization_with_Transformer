@@ -23,7 +23,7 @@ def extractor_opts(parser):
     group.add('-type', default='random',
               choices=['random', 'bert'],
               help=".")
-    group.add('-seed', type=float, default=0,
+    group.add('-seed', type=int, default=0,
               help=".")
 
 
