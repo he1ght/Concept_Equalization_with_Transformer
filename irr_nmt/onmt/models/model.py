@@ -55,7 +55,7 @@ class NMTModel(nn.Module):
         if self.ce_layer:
             c_s = torch.sum(memory_bank, 0)
             v_s = self.ce_layer(c_s)
-            v_t = torch.sum(dec_out, 0)
+            v_t = torch.sum(self.decoder.embeddings(dec_in), 0)
 
             # CE type 2 : hamming distance
             # new_cost = euclidean_distance(v_s, v_t)
