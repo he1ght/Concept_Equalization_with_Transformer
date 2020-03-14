@@ -204,6 +204,10 @@ def model_opts(parser):
     group = parser.add_argument_group('Irr_custom')
     group.add('--concept_equalization', '-concept_equalization', action="store_true",
               help="Use concept equalization")
+    group.add('--bert_embedding', '-bert_embedding', action="store_true",
+              help=".")
+    group.add('--bert_type', '-bert_type', type=str, default="bert-base-multilingual-cased",
+              help=".")
 
 def preprocess_opts(parser):
     """ Pre-procesing options """
