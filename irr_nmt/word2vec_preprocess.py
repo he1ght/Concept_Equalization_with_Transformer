@@ -76,12 +76,12 @@ if __name__ == '__main__':
             for line in tqdm(f.readlines()):
                 words = line.split()
                 new_words = []
-                new_words.append('<s>')
+                # new_words.append('<s>')
                 for word in words:
                     if not ( word in enc_vocab ):
                         word = '<unk>'
                     new_words.append(word)
-                new_words.append('</s>')
+                # new_words.append('</s>')
                 if len(words) < opt.pad_size:
                     for _ in range(opt.pad_size - len(words)):
                         new_words.append('<blank>')
@@ -104,10 +104,12 @@ if __name__ == '__main__':
             for line in tqdm(f.readlines()):
                 words = line.split()
                 new_words = []
+                new_words.append('<s>')
                 for word in words:
                     if not (word in dec_vocab):
                         word = '<unk>'
                     new_words.append(word)
+                new_words.append('</s>')
                 if len(words) < opt.pad_size:
                     for _ in range(opt.pad_size - len(words)):
                         new_words.append('<blank>')
