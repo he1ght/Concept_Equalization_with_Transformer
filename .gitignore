@@ -139,6 +139,7 @@ data/
 
 # Loggin file
 *.log
+*.txt
 log/
 
 # Pycharm file
@@ -147,5 +148,6 @@ log/
 # Pretrained data
 encoder_emb.txt
 decoder_emb.txt
+*.vec
 *encoder_emb.txt
 *decoder_emb.txt

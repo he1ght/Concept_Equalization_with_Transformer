@@ -34,6 +34,8 @@ def w2v_trainer_opts(parser):
               help="")
     group.add('--min_cnt', '-min_cnt', type=int, default=1,
               help="")
+    group.add('--dict_file', '-dict_file', type=str, default="",
+              help="")
 
 
 def _get_parser():
@@ -45,9 +47,9 @@ def _get_parser():
 
 class Word2VecTrainer:
     def __init__(self, input_file, output_file, emb_dimension=100, batch_size=32, window_size=5, epochs=3,
-                 initial_lr=0.001, min_count=12):
+                 initial_lr=0.001, min_count=12, vocab=None):
 
-        self.data = DataReader(input_file, min_count)
+        self.data = DataReader(input_file, min_count, vocab=vocab)
         dataset = Word2vecDataset(self.data, window_size)
         self.dataloader = DataLoader(dataset, batch_size=batch_size,
                                      shuffle=False, num_workers=0, collate_fn=dataset.collate)
@@ -93,15 +95,21 @@ class Word2VecTrainer:
                     #     print(" [Epoch {}, Iter {}/{}] Loss: ".format(epoch + 1, i + 1, 0) + str(running_loss))
             print(" [Epoch {}] Loss: ".format(epoch + 1) + str(running_loss))
 
-            self.skip_gram_model.save_embedding(self.data.id2word, self.output_file_name + str(epoch + 1) + ".vec")
+            self.skip_gram_model.save_embedding(self.data.id2word, self.output_file_name + '_' + str(epoch + 1) + ".vec")
 
 
 if __name__ == '__main__':
     parser = _get_parser()
 
     opt = parser.parse_args()
+
+    vocab = None
+    if opt.dict_file:
+        with open(opt.dict_file, 'r') as f:
+            line = f.readline()
+            vocab = line.split()
     w2v = Word2VecTrainer(input_file=opt.input, output_file=opt.output,
                           emb_dimension=opt.emb_dim, batch_size=opt.batch_size,
                           window_size=opt.window_size, epochs=opt.epochs,
-                          initial_lr=opt.lr, min_count=opt.min_cnt)
+                          initial_lr=opt.lr, min_count=opt.min_cnt, vocab=vocab)
     w2v.train()

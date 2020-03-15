@@ -40,7 +40,7 @@ class SkipGramModel(nn.Module):
     def save_embedding(self, id2word, file_name):
         embedding = self.u_embeddings.weight.cpu().data.numpy()
         with open(file_name, 'w') as f:
-            f.write('%d %d\n' % (len(id2word), self.emb_dimension))
+            # f.write('%d %d\n' % (len(id2word), self.emb_dimension))
             for wid, w in id2word.items():
                 e = ' '.join(map(lambda x: str(x), embedding[wid]))
                 f.write('%s %s\n' % (w, e))

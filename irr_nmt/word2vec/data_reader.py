@@ -8,11 +8,12 @@ np.random.seed(12345)
 class DataReader:
     NEGATIVE_TABLE_SIZE = 1e8
 
-    def __init__(self, inputFileName, min_count):
+    def __init__(self, inputFileName, min_count, vocab=None):
 
         self.negatives = []
         self.discards = []
         self.negpos = 0
+        self.vocab = vocab
 
         self.word2id = dict()
         self.id2word = dict()
@@ -40,13 +41,20 @@ class DataReader:
                         #     print("Read " + str(int(self.token_count / 1000000)) + "M words.")
 
         wid = 0
-        for w, c in word_frequency.items():
-            if c < min_count:
-                continue
-            self.word2id[w] = wid
-            self.id2word[wid] = w
-            self.word_frequency[wid] = c
-            wid += 1
+        if self.vocab is None:
+            for w, c in word_frequency.items():
+                if c < min_count:
+                    continue
+                self.word2id[w] = wid
+                self.id2word[wid] = w
+                self.word_frequency[wid] = c
+                wid += 1
+        else:
+            for w in self.vocab:
+                self.word2id[w] = wid
+                self.id2word[wid] = w
+                self.word_frequency[wid] = word_frequency[w]
+                wid += 1
         print("Total embeddings: " + str(len(self.word2id)))
 
     def initTableDiscards(self):
