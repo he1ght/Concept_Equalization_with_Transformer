@@ -302,7 +302,11 @@ class BERTEmbedding(nn.Module):
         self.make_embedding.add_module('bert_emb', bert_emb)
 
         if fix_word_vecs:
-            self.emb_luts.weight.requires_grad = False
+            self.make_embedding[0].word_embeddings.weight.requires_grad = False
+            self.make_embedding[0].position_embeddings.weight.requires_grad = False
+            self.make_embedding[0].token_type_embeddings.weight.requires_grad = False
+            self.make_embedding[0].LayerNorm.gamma.requires_grad = False
+            self.make_embedding[0].LayerNorm.beta.requires_grad = False
 
     @property
     def word_lut(self):
