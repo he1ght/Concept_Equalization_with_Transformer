@@ -205,11 +205,13 @@ def build_save_dataset(corpus_type, fields, src_reader, tgt_reader,
     if corpus_type == "train":
         vocab_path = opt.save_data + '.vocab.pt'
         if existing_fields is None:
+
             fields = _build_fields_vocab(
                 fields, counters, opt.data_type,
                 opt.share_vocab, opt.vocab_size_multiple,
                 opt.src_vocab_size, opt.src_words_min_frequency,
-                opt.tgt_vocab_size, opt.tgt_words_min_frequency)
+                opt.tgt_vocab_size, opt.tgt_words_min_frequency,
+                no_special=True if opt.no_special else False)
         else:
             fields = existing_fields
         torch.save(fields, vocab_path)
@@ -259,6 +261,9 @@ def preprocess(opt):
         opt.data_type,
         src_nfeats,
         tgt_nfeats,
+        pad='<'+opt.pad+'>',
+        bos='<'+opt.bos+'>',
+        eos='<'+opt.eos+'>',
         dynamic_dict=opt.dynamic_dict,
         with_align=opt.train_align[0] is not None,
         src_truncate=opt.src_seq_length_trunc,

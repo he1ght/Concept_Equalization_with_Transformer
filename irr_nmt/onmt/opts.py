@@ -204,7 +204,7 @@ def model_opts(parser):
     group = parser.add_argument_group('Irr_custom')
     group.add('--concept_equalization', '-concept_equalization', action="store_true",
               help="Use concept equalization")
-    group.add('--bert_embedding', '-bert_embedding', action="store_true",
+    group.add('--bert_emb', '-bert_emb', action="store_true",
               help=".")
     group.add('--bert_type', '-bert_type', type=str, default="bert-base-multilingual-cased",
               help=".")
@@ -339,6 +339,14 @@ def preprocess_opts(parser):
               choices=[3, 1],
               help="Using grayscale image can training "
                    "model faster and smaller")
+    group.add('--no_special', '-no_special', action='store_true',
+              help="No special args")
+    group.add('--pad', '-pad', type=str, default='blank',
+              help=".")
+    group.add('--bos', '-bos', type=str, default='s',
+              help=".")
+    group.add('--eos', '-eos', type=str, default='/s',
+              help=".")
 
 
 def train_opts(parser):

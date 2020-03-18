@@ -326,12 +326,14 @@ def _pad_vocab_to_multiple(vocab, multiple):
     return vocab
 
 
-def _build_field_vocab(field, counter, size_multiple=1, **kwargs):
+def _build_field_vocab(field, counter, size_multiple=1, no_special=False, **kwargs):
     # this is basically copy-pasted from torchtext.
     all_specials = [
         field.unk_token, field.pad_token, field.init_token, field.eos_token
     ]
     specials = [tok for tok in all_specials if tok is not None]
+    if no_special:
+        specials = []
     field.vocab = field.vocab_cls(counter, specials=specials, **kwargs)
     if size_multiple > 1:
         _pad_vocab_to_multiple(field.vocab, size_multiple)
@@ -350,12 +352,13 @@ def _load_vocab(vocab_path, name, counters, min_freq):
 
 
 def _build_fv_from_multifield(multifield, counters, build_fv_args,
-                              size_multiple=1):
+                              size_multiple=1, no_special=False):
     for name, field in multifield:
         _build_field_vocab(
             field,
             counters[name],
             size_multiple=size_multiple,
+            no_special=no_special,
             **build_fv_args[name])
         logger.info(" * %s vocab size: %d." % (name, len(field.vocab)))
 
@@ -363,25 +366,29 @@ def _build_fv_from_multifield(multifield, counters, build_fv_args,
 def _build_fields_vocab(fields, counters, data_type, share_vocab,
                         vocab_size_multiple,
                         src_vocab_size, src_words_min_frequency,
-                        tgt_vocab_size, tgt_words_min_frequency):
+                        tgt_vocab_size, tgt_words_min_frequency,
+                        no_special=False):
     build_fv_args = defaultdict(dict)
     build_fv_args["src"] = dict(
         max_size=src_vocab_size, min_freq=src_words_min_frequency)
     build_fv_args["tgt"] = dict(
         max_size=tgt_vocab_size, min_freq=tgt_words_min_frequency)
+
     tgt_multifield = fields["tgt"]
     _build_fv_from_multifield(
         tgt_multifield,
         counters,
         build_fv_args,
-        size_multiple=vocab_size_multiple if not share_vocab else 1)
+        size_multiple=vocab_size_multiple if not share_vocab else 1,
+        no_special=no_special)
     if data_type == 'text':
         src_multifield = fields["src"]
         _build_fv_from_multifield(
             src_multifield,
             counters,
             build_fv_args,
-            size_multiple=vocab_size_multiple if not share_vocab else 1)
+            size_multiple=vocab_size_multiple if not share_vocab else 1,
+            no_special=no_special)
         if share_vocab:
             # `tgt_vocab_size` is ignored when sharing vocabularies
             logger.info(" * merging src and tgt vocab...")
