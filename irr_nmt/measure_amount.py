@@ -29,6 +29,6 @@ def count_tokens(directory):
     return count
 
 
-cnt_sen = count(sys.argv[1])
-cnt_tok = count(sys.argv[1])
+cnt_sen = count_sents(sys.argv[1])
+cnt_tok = count_tokens(sys.argv[1])
 print("{} file has {} sentences, {} tokens.".format(sys.argv[1], cnt_sen, cnt_tok))
