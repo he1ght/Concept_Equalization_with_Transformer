@@ -32,8 +32,11 @@ def measure_prec(ref, pred):
         sent_ref = sent_refs[0]
         for index, word in enumerate(sent_ref):
             total += 1
-            if sent_pred[index] == word:
-                correct += 1
+            try:
+                if sent_pred[index] == word:
+                    correct += 1
+            except IndexError:
+                pass
     try:
         prec_score = correct / total
     except ZeroDivisionError:
