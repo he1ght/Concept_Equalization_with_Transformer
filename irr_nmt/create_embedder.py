@@ -25,6 +25,8 @@ def extractor_opts(parser):
               help=".")
     group.add('-seed', type=int, default=0,
               help=".")
+    group.add('-vec_len', type=float, default=0.1,
+              help=".")
 
 
 def _get_parser():
@@ -75,7 +77,7 @@ if __name__ == "__main__":
     dec_file_name = 'random_decoder_emb.txt' if opt.type == 'random' else 'bert_decoder_emb.txt'
 
     np.random.seed(opt.seed)
-    vecs = np.random.uniform(-1, 1, size=(len(enc_vocab), opt.vec_size)) * 5
+    vecs = np.random.uniform(-opt.vec_len, opt.vec_len, size=(len(enc_vocab), opt.vec_size))
     print("Encoder Vectors generated ... ", end="")
 
     with open(enc_file_name, 'w') as f:
@@ -87,7 +89,7 @@ if __name__ == "__main__":
             line += "\n"
             f.write(line)
 
-    vecs = np.random.uniform(-1, 1, size=(len(dec_vocab), opt.vec_size)) * 5
+    vecs = np.random.uniform(-opt.vec_len, opt.vec_len, size=(len(dec_vocab), opt.vec_size))
     print("Decoder Vectors generated ... ", end="")
     with open(dec_file_name, 'w') as f:
         for word, v in zip(dec_vocab, vecs):
