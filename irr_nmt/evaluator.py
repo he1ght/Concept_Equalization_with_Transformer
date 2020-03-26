@@ -7,7 +7,7 @@ nets_type = ['lstm', 'lstm_ce', 'trans', 'trans_ce']
 embs_type = ['re', 'wv', 'bert']
 data_name = {'commontest': 'test.en', 'newstest': 'newstest2014-fren-ppcd.en', 'nc-test': 'nc-test2007-ppcd.en'}
 
-base_data_path = '~/data/'
+base_data_path = '/home/temp_use/data/'
 base_pred_path = './predict/'
 
 for fl in fls:
