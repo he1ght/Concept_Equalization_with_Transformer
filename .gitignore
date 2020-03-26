@@ -151,3 +151,6 @@ decoder_emb.txt
 *.vec
 *encoder_emb.txt
 *decoder_emb.txt
+
+# Prediction
+predict/
