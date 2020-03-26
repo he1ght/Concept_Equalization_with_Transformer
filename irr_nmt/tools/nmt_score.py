@@ -50,5 +50,7 @@ if __name__ == '__main__':
     # list_of_hypothesis = hypothesis
     bleu_score = measure_bleu(list_of_references, hypothesis)
     prec_score = measure_prec(list_of_references, hypothesis)
-    print("Prec.: {}".format(prec_score))
+    round_bleu_socre = round(bleu_score, 4) * 100
+    round_prec_socre = round(prec_score, 4) * 100
+    print("Prec.: {}".format(prec_score), end=' | ')
     print("BLEU : {}".format(bleu_score))
