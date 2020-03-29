@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from measure_amount import count_sents
+
 from onmt.utils.parse import ArgumentParser
 from onmt.inputters.inputter import _old_style_vocab
 
@@ -59,6 +59,8 @@ if __name__ == "__main__":
     dec_vocab = dec_vocab.stoi.keys()
     enc_special_wl = 2
     dec_special_wl = 4
+
+    from measure_amount import count_sents
     src_len = count_sents(opt.src)
     tgt_len = count_sents(opt.tgt)
 
