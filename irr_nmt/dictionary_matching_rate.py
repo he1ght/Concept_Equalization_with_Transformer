@@ -1,6 +1,8 @@
 import numpy as np
 import torch
+from tqdm import tqdm
 
+from measure_amount import count_sents
 from onmt.utils.parse import ArgumentParser
 from onmt.inputters.inputter import _old_style_vocab
 
@@ -57,11 +59,15 @@ if __name__ == "__main__":
     dec_vocab = dec_vocab.stoi.keys()
     enc_special_wl = 2
     dec_special_wl = 4
+    src_len = count_sents(opt.src)
+    tgt_len = count_sents(opt.tgt)
 
     src_tok_tot, src_tok_cor = 0, 0
     src_words = []
+
+    print("== {}: {} sents, {}: {} sents ==".format(opt.src, src_len, opt.tgt, tgt_len))
     with open(opt.src, 'r') as f:
-        while True:
+        for _ in enumerate(tqdm(range(src_len))):
             line = f.readline()
             if not line:
                 break
@@ -84,7 +90,7 @@ if __name__ == "__main__":
 
     tgt_tok_tot, tgt_tok_cor = 0, 0
     tgt_words = []
-    with open(opt.tgt, 'r') as f:
+    for _ in enumerate(tqdm(range(tgt_len))):
         while True:
             line = f.readline()
             if not line:
