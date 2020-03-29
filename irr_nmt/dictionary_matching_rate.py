@@ -2,7 +2,6 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-
 from onmt.utils.parse import ArgumentParser
 from onmt.inputters.inputter import _old_style_vocab
 
@@ -33,6 +32,7 @@ def _get_parser():
     dict_matching_rate_opts(parser)
     return parser
 
+
 def count_sents(directory):
     f = open(directory, "r", encoding="utf8")
     count = 0
@@ -44,6 +44,7 @@ def count_sents(directory):
         count += 1
     f.close()
     return count
+
 
 def get_vocabs(dict_path):
     fields = torch.load(dict_path)
@@ -92,13 +93,13 @@ if __name__ == "__main__":
                     src_words.append(w)
     src_dict_rate = len(enc_vocab) / (len(src_words) + enc_special_wl)
     src_tok_rate = src_tok_cor / src_tok_tot
-    print(" * src matching rate. Dictionary: {.2f}% ({}/{}), Token: {.2f}% ({}/{})".format(src_dict_rate * 100,
-                                                                                           len(enc_vocab),
-                                                                                           len(src_words) +
-                                                                                           enc_special_wl,
-                                                                                           src_tok_rate * 100,
-                                                                                           src_tok_cor,
-                                                                                           src_tok_tot))
+    print(" * src matching rate. Dictionary: {:.2f}% ({}/{}), Token: {:.2f}% ({}/{})".format(src_dict_rate * 100,
+                                                                                             len(enc_vocab),
+                                                                                             len(src_words) +
+                                                                                             enc_special_wl,
+                                                                                             src_tok_rate * 100,
+                                                                                             src_tok_cor,
+                                                                                             src_tok_tot))
 
     tgt_tok_tot, tgt_tok_cor = 0, 0
     tgt_words = []
@@ -116,10 +117,10 @@ if __name__ == "__main__":
                     tgt_words.append(w)
     tgt_dict_rate = len(dec_vocab) / (len(tgt_words) + dec_special_wl)
     tgt_tok_rate = tgt_tok_cor / tgt_tok_tot
-    print(" * tgt matching rate. Dictionary: {.2f}% ({}/{}), Token: {.2f}% ({}/{})".format(tgt_dict_rate * 100,
-                                                                                           len(dec_vocab),
-                                                                                           len(tgt_words) +
-                                                                                           dec_special_wl,
-                                                                                           tgt_tok_rate * 100,
-                                                                                           tgt_tok_cor,
-                                                                                           tgt_tok_tot))
+    print(" * tgt matching rate. Dictionary: {:.2f}% ({}/{}), Token: {:.2f}% ({}/{})".format(tgt_dict_rate * 100,
+                                                                                             len(dec_vocab),
+                                                                                             len(tgt_words) +
+                                                                                             dec_special_wl,
+                                                                                             tgt_tok_rate * 100,
+                                                                                             tgt_tok_cor,
+                                                                                             tgt_tok_tot))
