@@ -33,6 +33,17 @@ def _get_parser():
     dict_matching_rate_opts(parser)
     return parser
 
+def count_sents(directory):
+    f = open(directory, "r", encoding="utf8")
+    count = 0
+
+    while True:
+        line = f.readline()
+        if not line:
+            break
+        count += 1
+    f.close()
+    return count
 
 def get_vocabs(dict_path):
     fields = torch.load(dict_path)
@@ -60,7 +71,6 @@ if __name__ == "__main__":
     enc_special_wl = 2
     dec_special_wl = 4
 
-    from measure_amount import count_sents
     src_len = count_sents(opt.src)
     tgt_len = count_sents(opt.tgt)
 

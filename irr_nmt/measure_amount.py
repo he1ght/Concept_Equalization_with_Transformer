@@ -1,5 +1,4 @@
 import sys
-from itertools import count
 
 
 def count_sents(directory):
