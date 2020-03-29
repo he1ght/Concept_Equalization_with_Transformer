@@ -103,8 +103,8 @@ if __name__ == "__main__":
 
     tgt_tok_tot, tgt_tok_cor = 0, 0
     tgt_words = []
-    for _ in enumerate(tqdm(range(tgt_len))):
-        while True:
+    with open(opt.tgt, 'r') as f:
+        for _ in enumerate(tqdm(range(tgt_len))):
             line = f.readline()
             if not line:
                 break
