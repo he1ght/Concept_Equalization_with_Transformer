@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     np.random.seed(opt.seed)
     vecs = np.random.uniform(-opt.vec_len, opt.vec_len, size=(len(enc_vocab), opt.vec_size))
-    print("Encoder Vectors generated ... ", end="")
+    print("Encoder Vectors generated ... ")
 
     with open(enc_file_name, 'w') as f:
         for word, v in zip(enc_vocab, vecs):
@@ -90,7 +90,7 @@ if __name__ == "__main__":
             f.write(line)
 
     vecs = np.random.uniform(-opt.vec_len, opt.vec_len, size=(len(dec_vocab), opt.vec_size))
-    print("Decoder Vectors generated ... ", end="")
+    print("Decoder Vectors generated ... ")
     with open(dec_file_name, 'w') as f:
         for word, v in zip(dec_vocab, vecs):
             line = ""
