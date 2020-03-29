@@ -76,6 +76,7 @@ if __name__ == "__main__":
     tgt_len = count_sents(opt.tgt)
 
     src_tok_tot, src_tok_cor = 0, 0
+    src_word_cor = 0
     src_words = []
 
     print("== {}: {} sents, {}: {} sents ==".format(opt.src, src_len, opt.tgt, tgt_len))
@@ -91,10 +92,13 @@ if __name__ == "__main__":
                     src_tok_cor += 1
                 if not (w in src_words):
                     src_words.append(w)
-    src_dict_rate = len(enc_vocab) / (len(src_words) + enc_special_wl)
+                    if w in enc_vocab:
+                        src_word_cor += 1
+    src_dict_rate = (src_word_cor + enc_special_wl) / (len(src_words) + enc_special_wl)
     src_tok_rate = src_tok_cor / src_tok_tot
     print(" * src matching rate. Dictionary: {:.2f}% ({}/{}), Token: {:.2f}% ({}/{})".format(src_dict_rate * 100,
-                                                                                             len(enc_vocab),
+                                                                                             src_word_cor +
+                                                                                             enc_special_wl,
                                                                                              len(src_words) +
                                                                                              enc_special_wl,
                                                                                              src_tok_rate * 100,
@@ -102,6 +106,7 @@ if __name__ == "__main__":
                                                                                              src_tok_tot))
 
     tgt_tok_tot, tgt_tok_cor = 0, 0
+    tgt_word_cor = 0
     tgt_words = []
     with open(opt.tgt, 'r') as f:
         for _ in enumerate(tqdm(range(tgt_len))):
@@ -115,10 +120,13 @@ if __name__ == "__main__":
                     tgt_tok_cor += 1
                 if not (w in tgt_words):
                     tgt_words.append(w)
-    tgt_dict_rate = len(dec_vocab) / (len(tgt_words) + dec_special_wl)
+                    if w in dec_vocab:
+                        tgt_word_cor += 1
+    tgt_dict_rate = (tgt_word_cor + dec_special_wl) / (len(tgt_words) + dec_special_wl)
     tgt_tok_rate = tgt_tok_cor / tgt_tok_tot
     print(" * tgt matching rate. Dictionary: {:.2f}% ({}/{}), Token: {:.2f}% ({}/{})".format(tgt_dict_rate * 100,
-                                                                                             len(dec_vocab),
+                                                                                             tgt_word_cor +
+                                                                                             dec_special_wl,
                                                                                              len(tgt_words) +
                                                                                              dec_special_wl,
                                                                                              tgt_tok_rate * 100,
