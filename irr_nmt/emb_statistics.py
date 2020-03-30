@@ -32,8 +32,8 @@ def get_stat(vecs):
     mean_elm = np.mean(vecs)
     std_elm = np.std(vecs)
 
-    min_length = np.min(vecs)
-    max_length = np.max(vecs)
+    min_length = np.min(all_vec_length)
+    max_length = np.max(all_vec_length)
     mean_length = np.mean(all_vec_length)
     std_length = np.std(all_vec_length)
 
