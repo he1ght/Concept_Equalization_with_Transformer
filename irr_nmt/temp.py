@@ -1,34 +1,25 @@
-# import torch
-# import gensim
-#
-# from onmt import inputters
-# from onmt.inputters.inputter import _build_fields_vocab
-#
-# vocab = torch.load('data/europarl.vocab.pt')
-# print(vocab)
-#
-# fields = inputters.get_fields(
-#         # opt.data_type,
-#         'text',
-#         119547,
-#         119547,
-#
-#     pad='<PAD>',
-#     bos='<S>',
-#     eos='<T>',
-#         # with_align=opt.train_align[0] is not None,
-#         # src_truncate=opt.src_seq_length_trunc,
-#         # tgt_truncate=opt.tgt_seq_length_trunc)
-# )
-#
-# fields = _build_fields_vocab(
-#                 fields, counters, opt.data_type,
-#                 opt.share_vocab, opt.vocab_size_multiple,
-#                 opt.src_vocab_size, opt.src_words_min_frequency,
-#                 opt.tgt_vocab_size, opt.tgt_words_min_frequency)
-#
-# print(fields)
-#
-# # print(vocab['indices'].use_vocab)
-# # print(fields['src'][1])
-# # print(fields['src'][0])
+from tqdm import tqdm
+from emb_statistics import get_stat
+from pytorch_pretrained_bert import BertModel
+
+model = BertModel.from_pretrained('bert-base-multilingual-cased')
+model.eval()
+bert_emb = model.embeddings
+
+# print(bert_emb)
+vectors = {}
+for i, v in enumerate(tqdm(bert_emb.word_embeddings.weight)):
+    vectors[i] = v.detach().numpy().tolist()
+word_stats = get_stat(vectors)
+vectors = {}
+for i, v in enumerate(tqdm(bert_emb.position_embeddings.weight)):
+    vectors[i] = v.detach().numpy().tolist()
+position_stats = get_stat(vectors)
+vectors = {}
+for i, v in enumerate(tqdm(bert_emb.token_type_embeddings.weight)):
+    vectors[i] = v.detach().numpy().tolist()
+token_stats = get_stat(vectors)
+
+print("Word Embedding: {}".format(word_stats))
+print("Position Embedding: {}".format(position_stats))
+print("Token Embedding: {}".format(token_stats))

@@ -1,7 +1,9 @@
-import math
 import sys
 import numpy as np
-from itertools import count
+import sys
+
+import numpy as np
+
 
 def txt2dict(directory):
     f = open(directory, "r", encoding="utf8")
@@ -44,4 +46,6 @@ if __name__ == '__main__':
     vectors = txt2dict(sys.argv[1])
     # print(vectors)
     stats = get_stat(vectors)
-    print(stats)
+    for k, e in stats:
+        print(k)
+        print("{:.4f}".format(e))
