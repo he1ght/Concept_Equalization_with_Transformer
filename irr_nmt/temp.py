@@ -7,17 +7,17 @@ model.eval()
 bert_emb = model.embeddings
 
 # print(bert_emb)
-vectors = {}
+vectors = []
 for i, v in enumerate(tqdm(bert_emb.word_embeddings.weight)):
-    vectors[i] = v.detach().numpy().tolist()
+    vectors.append(v.detach().numpy().tolist())
 word_stats = get_stat(vectors)
-vectors = {}
+vectors = []
 for i, v in enumerate(tqdm(bert_emb.position_embeddings.weight)):
-    vectors[i] = v.detach().numpy().tolist()
+    vectors.append(v.detach().numpy().tolist())
 position_stats = get_stat(vectors)
-vectors = {}
+vectors = []
 for i, v in enumerate(tqdm(bert_emb.token_type_embeddings.weight)):
-    vectors[i] = v.detach().numpy().tolist()
+    vectors.append(v.detach().numpy().tolist())
 token_stats = get_stat(vectors)
 
 print("Word Embedding: {}".format(word_stats))
