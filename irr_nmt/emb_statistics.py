@@ -7,7 +7,7 @@ import numpy as np
 
 def txt2dict(directory):
     f = open(directory, "r", encoding="utf8")
-    vecs = {}
+    vecs = []
     while True:
         line = f.readline()
         if not line:
@@ -15,25 +15,25 @@ def txt2dict(directory):
         line = line.split()
         word = line.pop(0)
         vec = [float(v) for v in line]
-        vecs[word] = vec
+        vecs.append(vec)
     f.close()
     return vecs
 
 def get_stat(vecs):
-    all_vec = []
+    # all_vec = []
     all_vec_length = []
-    for word, vec in vecs.items():
-        all_vec += vec
+    for vec in vecs:
+        # all_vec += vec
         vec_length = np.sqrt(np.sum([e ** 2 for e in vec]))
         all_vec_length.append(vec_length)
 
-    min_elm = min(all_vec)
-    max_elm = max(all_vec)
-    mean_elm = np.mean(all_vec)
-    std_elm = np.std(all_vec)
+    min_elm = np.min(vecs)
+    max_elm = np.max(vecs)
+    mean_elm = np.mean(vecs)
+    std_elm = np.std(vecs)
 
-    min_length = min(all_vec_length)
-    max_length = max(all_vec_length)
+    min_length = np.min(vecs)
+    max_length = np.max(vecs)
     mean_length = np.mean(all_vec_length)
     std_length = np.std(all_vec_length)
 
