@@ -20,6 +20,15 @@ for i, v in enumerate(tqdm(bert_emb.token_type_embeddings.weight)):
     vectors.append(v.detach().numpy().tolist())
 token_stats = get_stat(vectors)
 
-print("Word Embedding: {}".format(word_stats))
-print("Position Embedding: {}".format(position_stats))
-print("Token Embedding: {}".format(token_stats))
+print("Word Embedding:")
+for k, e in word_stats.items():
+    print(k)
+    print("{:.4f}".format(e))
+print("Position Embedding:")
+for k, e in position_stats.items():
+    print(k)
+    print("{:.4f}".format(e))
+print("Token Embedding:")
+for k, e in token_stats.items():
+    print(k)
+    print("{:.4f}".format(e))
