@@ -46,6 +46,6 @@ if __name__ == '__main__':
     vectors = txt2dict(sys.argv[1])
     # print(vectors)
     stats = get_stat(vectors)
-    for k, e in stats:
+    for k, e in stats.items():
         print(k)
         print("{:.4f}".format(e))
