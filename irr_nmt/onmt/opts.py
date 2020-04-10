@@ -821,6 +821,9 @@ def analysis_opts(parser):
               type=str, default="runs/onmt",
               help="Log directory for Tensorboard. "
                    "This is also the name of the run.")
+    group.add('--fp32', '-fp32', action='store_true',
+              help="Force the model to be in FP32 "
+                   "because FP16 is very slow on GTX1080(ti).")
 
 
 # Copyright 2016 The Chromium Authors. All rights reserved.
