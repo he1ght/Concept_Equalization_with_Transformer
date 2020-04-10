@@ -209,6 +209,7 @@ def model_opts(parser):
     group.add('--bert_type', '-bert_type', type=str, default="bert-base-multilingual-cased",
               help=".")
 
+
 def preprocess_opts(parser):
     """ Pre-procesing options """
     # Data options
@@ -596,7 +597,6 @@ def train_opts(parser):
                    "model faster and smaller")
 
 
-
 def translate_opts(parser):
     """ Translation / inference options """
     group = parser.add_argument_group('Model')
@@ -758,6 +758,69 @@ def translate_opts(parser):
               type=int, default=3, choices=[3, 1],
               help="Using grayscale image can training "
                    "model faster and smaller")
+
+
+def analysis_opts(parser):
+    """ Training and saving options """
+
+    group = parser.add_argument_group('General')
+    group.add('--data', '-data', required=True,
+              help='Path prefix to the ".train.pt" and '
+                   '".valid.pt" file path from preprocess.py')
+
+    group.add('--data_ids', '-data_ids', nargs='+', default=[None],
+              help="In case there are several corpora.")
+    group.add('--data_weights', '-data_weights', type=int, nargs='+',
+              default=[1], help="""Weights of different corpora,
+              should follow the same order as in -data_ids.""")
+
+    # GPU
+    group.add('--gpu', '-gpu', default=-1, type=int,
+              help="list of ranks of each process.")
+
+    group.add('--seed', '-seed', type=int, default=-1,
+              help="Random seed used for the experiments "
+                   "reproducibility.")
+
+    group.add('--model', '-model', default='', type=str,
+              help="If training from a checkpoint then this is the "
+                   "path to the pretrained model's state_dict.")
+
+    # Optimization options
+    group = parser.add_argument_group('Optimization- Type')
+    group.add('--batch_size', '-batch_size', type=int, default=64,
+              help='Maximum batch size for training')
+    group.add('--batch_type', '-batch_type', default='sents',
+              choices=["sents", "tokens"],
+              help="Batch grouping for batch_size. Standard "
+                   "is sents. Tokens will do dynamic batching")
+    group.add('--normalization', '-normalization', default='sents',
+              choices=["sents", "tokens"],
+              help='Normalization method of the gradient.')
+    group.add('--train_steps', '-train_steps', type=int, default=100000,
+              help='Number of training steps')
+
+    group = parser.add_argument_group('Logging')
+    group.add('--report_every', '-report_every', type=int, default=50,
+              help="Print stats at this interval.")
+    group.add('--log_file', '-log_file', type=str, default="",
+              help="Output logs to a file under this path.")
+    group.add('--log_file_level', '-log_file_level', type=str,
+              action=StoreLoggingLevelAction,
+              choices=StoreLoggingLevelAction.CHOICES,
+              default="0")
+    group.add('--exp_host', '-exp_host', type=str, default="",
+              help="Send logs to this crayon server.")
+    group.add('--exp', '-exp', type=str, default="",
+              help="Name of the experiment for logging.")
+    # Use Tensorboard for visualization during training
+    group.add('--tensorboard', '-tensorboard', action="store_true",
+              help="Use tensorboard for visualization during training. "
+                   "Must have the library tensorboard >= 1.14.")
+    group.add("--tensorboard_log_dir", "-tensorboard_log_dir",
+              type=str, default="runs/onmt",
+              help="Log directory for Tensorboard. "
+                   "This is also the name of the run.")
 
 
 # Copyright 2016 The Chromium Authors. All rights reserved.
