@@ -824,6 +824,13 @@ def analysis_opts(parser):
     group.add('--fp32', '-fp32', action='store_true',
               help="Force the model to be in FP32 "
                    "because FP16 is very slow on GTX1080(ti).")
+    group.add('--label_smoothing', '-label_smoothing', type=float, default=0.0,
+              help="Label smoothing value epsilon. "
+                   "Probabilities of all non-true labels "
+                   "will be smoothed by epsilon / (vocab_size - 1). "
+                   "Set to zero to turn off label smoothing. "
+                   "For more detailed information, see: "
+                   "https://arxiv.org/abs/1512.00567")
 
 
 # Copyright 2016 The Chromium Authors. All rights reserved.
