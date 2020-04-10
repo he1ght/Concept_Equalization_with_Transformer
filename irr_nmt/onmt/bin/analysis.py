@@ -109,10 +109,8 @@ def run_single(opt, device_id, batch_queue=None, semaphore=None):
         logger.info('Starting training on GPU: %s' % opt.gpu)
     else:
         logger.info('Starting training on CPU, could be very slow')
-    train_steps = opt.train_steps
-    if opt.single_pass and train_steps > 0:
-        logger.warning("Option single_pass is enabled, ignoring train_steps.")
-        train_steps = 0
+
+    train_steps = 0
 
     trainer.train(
         train_iter,
@@ -140,36 +138,18 @@ def build_trainer(opt, device_id, model, fields, steper, model_saver=None):
     tgt_field = dict(fields)["tgt"].base_field
     train_loss = onmt.utils.loss.build_loss_compute(model, tgt_field, opt)
 
-    trunc_size = opt.truncated_decoder  # Badly named...
-    shard_size = opt.max_generator_batches if opt.model_dtype == 'fp32' else 0
-    norm_method = opt.normalization
-
-    average_decay = opt.average_decay
-    average_every = opt.average_every
-    dropout = opt.dropout
-    dropout_steps = opt.dropout_steps
     if device_id >= 0:
         n_gpu = 1
         gpu_rank = device_id
     else:
         gpu_rank = 0
         n_gpu = 0
-    gpu_verbose_level = opt.gpu_verbose_level
 
-    earlystopper = onmt.utils.EarlyStopping(
-        opt.early_stopping, scorers=onmt.utils.scorers_from_opts(opt)) \
-        if opt.early_stopping > 0 else None
 
     report_manager = onmt.utils.build_report_manager(opt, gpu_rank)
-    trainer = Trainer(model, train_loss, steper, trunc_size,
-                      shard_size, norm_method,
-                      n_gpu, gpu_rank, report_manager,
-                      with_align=True if opt.lambda_align > 0 else False,
-                      # model_saver=model_saver if gpu_rank == 0 else None,
-                      model_saver=model_saver,
-                      average_decay=average_decay,
-                      average_every=average_every,
-                      model_dtype=opt.model_dtype)
+    trainer = Trainer(model, train_loss, steper,
+                      n_gpu=n_gpu, gpu_rank=gpu_rank, report_manager=report_manager,
+                      with_align=True if opt.lambda_align > 0 else False)
     return trainer
 
 
