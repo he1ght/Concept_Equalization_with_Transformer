@@ -15,9 +15,9 @@ from onmt.utils.parse import ArgumentParser
 
 
 def analysis(opt):
-    ArgumentParser.validate_train_opts(opt)
-    ArgumentParser.update_model_opts(opt)
-    ArgumentParser.validate_model_opts(opt)
+    # ArgumentParser.validate_train_opts(opt)
+    # ArgumentParser.update_model_opts(opt)
+    # ArgumentParser.validate_model_opts(opt)
 
     if opt.gpu != -1 and torch.cuda.is_available():  # case 1 GPU only
         run_single(opt, opt.gpu)
