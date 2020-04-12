@@ -180,11 +180,12 @@ class CopyGeneratorLoss(nn.Module):
 class CopyGeneratorLossCompute(NMTLossCompute):
     """Copy Generator Loss Computation."""
     def __init__(self, criterion, generator, tgt_vocab, normalize_by_length,
-                 lambda_coverage=0.0):
+                 lambda_coverage=0.0, do_backward=True,):
         super(CopyGeneratorLossCompute, self).__init__(
             criterion, generator, lambda_coverage=lambda_coverage)
         self.tgt_vocab = tgt_vocab
         self.normalize_by_length = normalize_by_length
+        self.do_backward = do_backward
 
     def _make_shard_state(self, batch, output, range_, attns):
         """See base class for args description."""

@@ -821,6 +821,8 @@ def analysis_opts(parser):
               type=str, default="runs/onmt",
               help="Log directory for Tensorboard. "
                    "This is also the name of the run.")
+
+    group = parser.add_argument_group('Dummy')
     group.add('--fp32', '-fp32', action='store_true',
               help="Force the model to be in FP32 "
                    "because FP16 is very slow on GTX1080(ti).")
@@ -831,6 +833,23 @@ def analysis_opts(parser):
                    "Set to zero to turn off label smoothing. "
                    "For more detailed information, see: "
                    "https://arxiv.org/abs/1512.00567")
+    group.add('--pool_factor', '-pool_factor', type=int, default=8192,
+              help="""Factor used in data loading and batch creations.
+              It will load the equivalent of `pool_factor` batches,
+              sort them by the according `sort_key` to produce
+              homogeneous batches and reduce padding, and yield
+              the produced batches in a shuffled way.
+              Inspired by torchtext's pool mechanism.""")
+    group.add('--single_pass', '-single_pass', default=True,
+              help="Make a single pass over the training dataset.")
+    group.add('--world_size', '-world_size', default=1, type=int,
+              help="total number of distributed processes.")
+    group.add('--accum_count', '-accum_count', type=int, nargs='+',
+              default=[1],
+              help="Accumulate gradient this many times. "
+                   "Approximately equivalent to updating "
+                   "batch_size * accum_count batches at once. "
+                   "Recommended for Transformer.")
 
 
 # Copyright 2016 The Chromium Authors. All rights reserved.

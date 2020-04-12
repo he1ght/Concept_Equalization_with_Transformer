@@ -12,7 +12,7 @@ from onmt.modules.sparse_losses import SparsemaxLoss
 from onmt.modules.sparse_activations import LogSparsemax
 
 
-def build_loss_compute(model, tgt_field, opt, train=True):
+def build_loss_compute(model, tgt_field, opt, train=True, do_backward=True):
     """
     Returns a LossCompute subclass which wraps around an nn.Module subclass
     (such as nn.NLLLoss) which defines the loss criterion. The LossCompute
@@ -53,12 +53,14 @@ def build_loss_compute(model, tgt_field, opt, train=True):
     if opt.copy_attn:
         compute = onmt.modules.CopyGeneratorLossCompute(
             criterion, loss_gen, tgt_field.vocab, opt.copy_loss_by_seqlength,
-            lambda_coverage=opt.lambda_coverage
+            lambda_coverage=opt.lambda_coverage,
+            do_backward=do_backward
         )
     else:
         compute = NMTLossCompute(
             criterion, loss_gen, lambda_coverage=opt.lambda_coverage,
-            lambda_align=opt.lambda_align)
+            lambda_align=opt.lambda_align,
+        do_backward = do_backward)
     compute.to(device)
 
     return compute
@@ -83,10 +85,11 @@ class LossComputeBase(nn.Module):
         normalzation (str): normalize by "sents" or "tokens"
     """
 
-    def __init__(self, criterion, generator):
+    def __init__(self, criterion, generator, do_backward=True):
         super(LossComputeBase, self).__init__()
         self.criterion = criterion
         self.generator = generator
+        self.do_backward = do_backward
 
     @property
     def padding_idx(self):
@@ -170,13 +173,17 @@ class LossComputeBase(nn.Module):
             stats.loss = loss.clone().item()
             return loss / float(normalization), stats
         batch_stats = onmt.utils.Statistics()
-        for shard in shards(shard_state, shard_size):
+        for shard in shards(shard_state, shard_size, do_backward=self.do_backward):
             loss, stats = self._compute_loss(batch, **shard)
             # todo shard my new cost but just do it now ============== Not implemented
             if new_cost is not None:
                 loss += new_cost
+                stats.new_loss = new_cost.clone().item()
+            else:
+                stats.new_loss = 0
             stats.loss = loss.clone().item()
-            loss.div(float(normalization)).backward()
+            if self.do_backward:
+                loss.div(float(normalization)).backward()
             batch_stats.update(stats)
         return None, batch_stats
 
@@ -239,10 +246,11 @@ class NMTLossCompute(LossComputeBase):
     """
 
     def __init__(self, criterion, generator, normalization="sents",
-                 lambda_coverage=0.0, lambda_align=0.0):
+                 lambda_coverage=0.0, lambda_align=0.0, do_backward=True,):
         super(NMTLossCompute, self).__init__(criterion, generator)
         self.lambda_coverage = lambda_coverage
         self.lambda_align = lambda_align
+        self.do_backward = do_backward
 
     def _make_shard_state(self, batch, output, range_, attns=None):
         shard_state = {
@@ -345,7 +353,7 @@ def filter_shard_state(state, shard_size=None):
             yield k, (v, v_split)
 
 
-def shards(state, shard_size, eval_only=False):
+def shards(state, shard_size, eval_only=False, do_backward=True):
     """
     Args:
         state: A dictionary which corresponds to the output of
@@ -392,4 +400,5 @@ def shards(state, shard_size, eval_only=False):
                 variables.extend(zip(torch.split(state[k], shard_size),
                                      [v_chunk.grad for v_chunk in v_split]))
         inputs, grads = zip(*variables)
-        torch.autograd.backward(inputs, grads)
+        if do_backward:
+            torch.autograd.backward(inputs, grads)

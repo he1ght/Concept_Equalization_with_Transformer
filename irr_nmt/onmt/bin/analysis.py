@@ -19,6 +19,8 @@ def analysis(opt):
     # ArgumentParser.update_model_opts(opt)
     # ArgumentParser.validate_model_opts(opt)
 
+    opt.gpu_ranks = [opt.gpu] if opt.gpu != -1 else []
+
     if opt.gpu != -1 and torch.cuda.is_available():  # case 1 GPU only
         run_single(opt, opt.gpu)
     else:  # case only CPU
@@ -67,6 +69,7 @@ def run_single(opt, device_id, batch_queue=None, semaphore=None):
     # Build model.
     logger.info('Loading model from %s' % opt.model)
     fields, model, model_opt = load_test_model(opt, opt.model)
+    print(model)
     ArgumentParser.update_model_opts(model_opt)
     ArgumentParser.validate_model_opts(model_opt)
     logger.info('Loading vocab from model at %s.' % opt.model)
@@ -105,7 +108,7 @@ def run_single(opt, device_id, batch_queue=None, semaphore=None):
             shard_base = "train"
         train_iter = build_dataset_iter(shard_base, fields, opt)
 
-    if len(opt.gpu):
+    if opt.gpu != -1:
         logger.info('Starting training on GPU: %s' % opt.gpu)
     else:
         logger.info('Starting training on CPU, could be very slow')
@@ -136,7 +139,7 @@ def build_trainer(opt, device_id, model, fields, steper, model_saver=None):
     """
 
     tgt_field = dict(fields)["tgt"].base_field
-    train_loss = onmt.utils.loss.build_loss_compute(model, tgt_field, opt)
+    train_loss = onmt.utils.loss.build_loss_compute(model, tgt_field, opt, do_backward=False)
 
     if device_id >= 0:
         n_gpu = 1
@@ -155,11 +158,11 @@ def build_trainer(opt, device_id, model, fields, steper, model_saver=None):
 
 class Steper(object):
     def __init__(self):
-        self.analysis_step = 1
+        self.analysis_step = 0
         self._fp16 = None
 
-    def step(self):
-        self.analysis_step += 1
+    def step(self, step=1):
+        self.analysis_step += step
 
 
 class Trainer(object):
@@ -187,7 +190,7 @@ class Trainer(object):
         self.average_every = average_every
         self.model_dtype = model_dtype
 
-        self.model.eval()
+        self.model.train()
 
     def _accum_batches(self, iterator):
         batches = []
@@ -230,6 +233,7 @@ class Trainer(object):
 
         for i, (batches, normalization) in enumerate(
                 self._accum_batches(train_iter)):
+            self.steper.step(batches[0].tgt.size(1))
             step = self.steper.analysis_step
 
             if self.n_gpu > 1:
@@ -281,24 +285,18 @@ class Trainer(object):
                 bptt = True
 
                 # 3. Compute loss.
-                try:
-                    loss, batch_stats = self.train_loss(
-                        batch,
-                        outputs,
-                        attns,
-                        normalization=normalization,
-                        shard_size=self.shard_size,
-                        trunc_start=j,
-                        trunc_size=trunc_size,
-                        new_cost=new_cost)
+                loss, batch_stats = self.train_loss(
+                    batch,
+                    outputs,
+                    attns,
+                    normalization=normalization,
+                    shard_size=self.shard_size,
+                    trunc_start=j,
+                    trunc_size=trunc_size,
+                    new_cost=new_cost)
 
-                    total_stats.update(batch_stats)
-                    report_stats.update(batch_stats)
-
-                except Exception:
-                    traceback.print_exc()
-                    logger.info("At step %d, we removed a batch - accum %d",
-                                self.steper.analysis_step, k)
+                total_stats.update(batch_stats)
+                report_stats.update(batch_stats)
 
                 # If truncated, don't backprop fully.
                 # TO CHECK
@@ -340,7 +338,7 @@ class Trainer(object):
         """
         if self.report_manager is not None:
             return self.report_manager.report_training(
-                step, num_steps, report_stats,
+                step, num_steps, 0, report_stats,
                 multigpu=self.n_gpu > 1)
 
     def _report_step(self, step, train_stats=None,
@@ -350,7 +348,7 @@ class Trainer(object):
         see `onmt.utils.ReportManagerBase.report_step` for doc
         """
         if self.report_manager is not None:
-            return self.report_manager.report_step(
+            return self.report_manager.report_step(0,
                 step, train_stats=train_stats,
                 valid_stats=valid_stats)
 
