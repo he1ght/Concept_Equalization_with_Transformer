@@ -53,18 +53,24 @@ class NMTModel(nn.Module):
                                       memory_lengths=lengths,
                                       with_align=with_align)
         if self.ce_layer:
-            c_s = torch.sum(memory_bank, 0)
-            v_s = self.ce_layer(c_s)
-            v_t = torch.sum(self.decoder.embeddings(dec_in), 0)
+            new_cost = self.get_distance(torch.sum(memory_bank, 0), self.decoder.embeddings(dec_in))
 
-            # CE type 2 : hamming distance
-            # new_cost = euclidean_distance(v_s, v_t)
-            new_cost = hamming_distance(v_s, v_t)
         return dec_out, attns, new_cost
 
     def update_dropout(self, dropout):
         self.encoder.update_dropout(dropout)
         self.decoder.update_dropout(dropout)
+
+    def get_distance(self, enc_out_vec, dec_in_vec):
+        c_s = torch.sum(enc_out_vec, 0)
+        c_t = dec_in_vec
+        v_s = self.ce_layer(c_s) if self.ce_layer else c_s
+        v_t = torch.sum(c_t, 0)
+
+        # CE type 2 : hamming distance
+        # new_cost = euclidean_distance(v_s, v_t)
+        distance = hamming_distance(v_s, v_t)
+        return distance
 
 
 def euclidean_distance(inputs, target):

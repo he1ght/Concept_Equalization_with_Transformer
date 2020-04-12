@@ -782,7 +782,7 @@ def analysis_opts(parser):
               help="Random seed used for the experiments "
                    "reproducibility.")
 
-    group.add('--model', '-model', default='', type=str,
+    group.add('--model', '-model', default='', type=str, required=True,
               help="If training from a checkpoint then this is the "
                    "path to the pretrained model's state_dict.")
 
@@ -801,7 +801,7 @@ def analysis_opts(parser):
               help='Number of training steps')
 
     group = parser.add_argument_group('Logging')
-    group.add('--report_every', '-report_every', type=int, default=50,
+    group.add('--report_every', '-report_every', type=int, default=1,
               help="Print stats at this interval.")
     group.add('--log_file', '-log_file', type=str, default="",
               help="Output logs to a file under this path.")
