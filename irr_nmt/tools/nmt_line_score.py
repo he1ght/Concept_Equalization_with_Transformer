@@ -51,6 +51,7 @@ if __name__ == '__main__':
     # list_of_hypothesis = hypothesis
     total_cnt = len(list_of_references)
     ce_better_cnt = 0
+    worse_cnt = 0
 
     for src, hyp, hyp_ce in zip (list_of_references, hypothesis, hypothesis_ce):
         bleu_score = measure_bleu(src, hyp)
@@ -69,5 +70,9 @@ if __name__ == '__main__':
             print("P_CE: {}".format(" ".join(hyp_ce)))
             print("BLEU: {}, BLEU_CE: {}".format(round_bleu_score, round_bleu_score_ce))
             print()
+        elif bleu_score_ce < bleu_score:
+            worse_cnt += 1
     round_better_score = round(ce_better_cnt/total_cnt, 4) * 100
     print("Better score: {}%".format(round_better_score))
+    round_worse_score = round(worse_cnt/total_cnt, 4) * 100
+    print("Worse score: {}%".format(round_worse_score))
