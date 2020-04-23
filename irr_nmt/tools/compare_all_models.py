@@ -94,6 +94,6 @@ if __name__ == '__main__':
         for i, hypothesis in enumerate(list_of_hypothesis_ce):
             print("{}: {}".format(opt.pred_ce[i], " ".join(hypothesis[idx])))
         print()
-
+    print(intersection)
     round_better_score = round(better_cnt/total_cnt, 4) * 100
-    print("Better score: {}%".format(round_better_score))
+    print("Better score: {:.2f}% ({}/{})".format(round_better_score, better_cnt, total_cnt))
