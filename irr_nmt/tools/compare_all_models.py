@@ -84,7 +84,8 @@ if __name__ == '__main__':
             intersection = set(better_line)
         else:
             intersection = intersection.intersection(set(better_line))
-    intersection = list(list(intersection).sort())
+    intersection = list(intersection)
+    intersection.sort()
     better_cnt = len(intersection)
     for idx in intersection:
         print("No. {}".format(idx + 1))
