@@ -20,6 +20,8 @@ def compare_opts(parser):
               help="")
     group.add('-pred_ce', required=True, default=[], nargs='*', type=str,
               help="")
+    group.add('-lines', default=[], nargs='*', type=int,
+              help="")
 
 
 def _get_parser():
@@ -85,6 +87,8 @@ if __name__ == '__main__':
         else:
             intersection = intersection.intersection(set(better_line))
     intersection = list(intersection)
+    if opt.lines:
+        intersection = list(set(opt.lines))
     intersection.sort()
     better_cnt = len(intersection)
     for idx in intersection:
@@ -94,6 +98,6 @@ if __name__ == '__main__':
             print("{:<20}: {}".format(opt.pred[i].split('/')[-1][:-4], " ".join(hypothesis[idx])))
             print("{:<20}: {}".format(opt.pred_ce[i].split('/')[-1][:-4], " ".join(hypothesis_ce[idx])))
         print()
-    print(intersection)
+    # print(intersection)
     round_better_score = round(better_cnt/total_cnt, 4) * 100
     print("Better score: {:.2f}% ({}/{})".format(round_better_score, better_cnt, total_cnt))
