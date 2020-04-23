@@ -84,15 +84,14 @@ if __name__ == '__main__':
             intersection = set(better_line)
         else:
             intersection = intersection.intersection(set(better_line))
-    intersection = list(intersection)
+    intersection = list(list(intersection).sort())
     better_cnt = len(intersection)
     for idx in intersection:
         print("No. {}".format(idx + 1))
         print("REF: {}".format(" ".join(list_of_references[idx][0])))
-        for i, hypothesis in enumerate(list_of_hypothesis):
+        for i, (hypothesis, hypothesis_ce) in enumerate(zip(list_of_hypothesis, list_of_hypothesis_ce)):
             print("{}: {}".format(opt.pred[i], " ".join(hypothesis[idx])))
-        for i, hypothesis in enumerate(list_of_hypothesis_ce):
-            print("{}: {}".format(opt.pred_ce[i], " ".join(hypothesis[idx])))
+            print("{}: {}".format(opt.pred_ce[i], " ".join(hypothesis_ce[idx])))
         print()
     print(intersection)
     round_better_score = round(better_cnt/total_cnt, 4) * 100
