@@ -89,10 +89,10 @@ if __name__ == '__main__':
     better_cnt = len(intersection)
     for idx in intersection:
         print("No. {}".format(idx + 1))
-        print("REF: {:15s}".format(" ".join(list_of_references[idx][0])))
+        print("{:<20}: {}".format("REF"," ".join(list_of_references[idx][0])))
         for i, (hypothesis, hypothesis_ce) in enumerate(zip(list_of_hypothesis, list_of_hypothesis_ce)):
-            print("{:15s}: {}".format(opt.pred[i].split('/')[-1][:-4], " ".join(hypothesis[idx])))
-            print("{:15s}: {}".format(opt.pred_ce[i].split('/')[-1][:-4], " ".join(hypothesis_ce[idx])))
+            print("{:<20}: {}".format(opt.pred[i].split('/')[-1][:-4], " ".join(hypothesis[idx])))
+            print("{:<20}: {}".format(opt.pred_ce[i].split('/')[-1][:-4], " ".join(hypothesis_ce[idx])))
         print()
     print(intersection)
     round_better_score = round(better_cnt/total_cnt, 4) * 100
