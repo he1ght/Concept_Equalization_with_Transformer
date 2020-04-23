@@ -87,10 +87,10 @@ if __name__ == '__main__':
         else:
             intersection = intersection.intersection(set(better_line))
     intersection = list(intersection)
+    better_cnt = len(intersection)
     if opt.lines:
         intersection = list(set([l - 1 for l in opt.lines]))
     intersection.sort()
-    better_cnt = len(intersection)
     for idx in intersection:
         print("No. {}".format(idx + 1))
         print("{:<20}: {}".format("REF"," ".join(list_of_references[idx][0])))
