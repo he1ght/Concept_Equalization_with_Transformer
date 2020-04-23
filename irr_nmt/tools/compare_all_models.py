@@ -16,6 +16,8 @@ def compare_opts(parser):
     group = parser.add_argument_group('Opts')
     group.add('-ref', required=True,
               help="")
+    group.add('-src', type=str, default="",
+              help="")
     group.add('-pred', required=True, default=[], nargs='*', type=str,
               help="")
     group.add('-pred_ce', required=True, default=[], nargs='*', type=str,
@@ -62,6 +64,10 @@ if __name__ == '__main__':
     assert len(opt.pred) == len(opt.pred_ce)
     assert len(opt.pred) > 0
     list_of_references = read_list_of_words(opt.ref, ref=True)
+    if opt.src:
+        sources = read_list_of_words(opt.src)
+    else:
+        sources = None
     list_of_hypothesis = [read_list_of_words(h) for h in opt.pred]
     list_of_hypothesis_ce = [read_list_of_words(h) for h in opt.pred_ce]
 
@@ -93,6 +99,8 @@ if __name__ == '__main__':
     intersection.sort()
     for idx in intersection:
         print("No. {}".format(idx + 1))
+        if sources:
+            print("{:<20}: {}".format("SRC", " ".join(sources[idx])))
         print("{:<20}: {}".format("REF"," ".join(list_of_references[idx][0])))
         for i, (hypothesis, hypothesis_ce) in enumerate(zip(list_of_hypothesis, list_of_hypothesis_ce)):
             print("{:<20}: {}".format(opt.pred[i].split('/')[-1][:-4], " ".join(hypothesis[idx])))
