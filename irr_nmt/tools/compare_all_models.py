@@ -71,20 +71,27 @@ if __name__ == '__main__':
     list_of_hypothesis = [read_list_of_words(h) for h in opt.pred]
     list_of_hypothesis_ce = [read_list_of_words(h) for h in opt.pred_ce]
 
+    list_of_bleu = []
+    list_of_bleu_ce = []
+
     total_cnt = len(list_of_references)
     better_line_list = []
     for hypothesis, hypothesis_ce in zip(list_of_hypothesis, list_of_hypothesis_ce):
         idx = 0
         better_line = []
+        bleus = []
+        bleus_ce = []
         for src, hyp, hyp_ce in zip(list_of_references, hypothesis, hypothesis_ce):
             bleu_score = measure_bleu(src, hyp)
             bleu_score_ce = measure_bleu(src, hyp_ce)
-            round_bleu_score = round(bleu_score, 4) * 100
-            round_bleu_score_ce = round(bleu_score_ce, 4) * 100
+            bleus.append(bleu_score)
+            bleus_ce.append(bleu_score_ce)
             if bleu_score_ce > bleu_score:
                 better_line.append(idx)
             idx += 1
         better_line_list.append(better_line)
+        list_of_bleu.append(bleus)
+        list_of_bleu_ce.append(bleus_ce)
 
     intersection = None
     for better_line in better_line_list:
@@ -103,13 +110,11 @@ if __name__ == '__main__':
             print("{:<20}: {}".format("SRC", " ".join(sources[idx])))
         print("{:<20}: {}".format("REF"," ".join(list_of_references[idx][0])))
         for i, (hypothesis, hypothesis_ce) in enumerate(zip(list_of_hypothesis, list_of_hypothesis_ce)):
-            bleu_score = measure_bleu(list_of_references[idx], hypothesis[idx])
-            bleu_score_ce = measure_bleu(list_of_references[idx], hypothesis_ce[idx])
-            round_bleu_score = round(bleu_score, 4) * 100
-            round_bleu_score_ce = round(bleu_score_ce, 4) * 100
+            round_bleu_score = round(list_of_bleu[i][idx], 4) * 100
+            round_bleu_score_ce = round(list_of_bleu_ce[i][idx], 4) * 100
             print("{:<20}: {}".format(opt.pred[i].split('/')[-1][:-4], " ".join(hypothesis[idx])))
             print("{:<20}: {}".format(opt.pred_ce[i].split('/')[-1][:-4], " ".join(hypothesis_ce[idx])))
-            print("BLEU: {}, BLEU_CE: {}".format(round_bleu_score, round_bleu_score_ce))
+            print(" * BLEU: {:.2f}, BLEU_CE: {:.2f}".format(round_bleu_score, round_bleu_score_ce))
         print()
     # print(intersection)
     round_better_score = round(better_cnt/total_cnt, 4) * 100
