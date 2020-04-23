@@ -103,8 +103,13 @@ if __name__ == '__main__':
             print("{:<20}: {}".format("SRC", " ".join(sources[idx])))
         print("{:<20}: {}".format("REF"," ".join(list_of_references[idx][0])))
         for i, (hypothesis, hypothesis_ce) in enumerate(zip(list_of_hypothesis, list_of_hypothesis_ce)):
+            bleu_score = measure_bleu(list_of_references[idx], hypothesis[idx])
+            bleu_score_ce = measure_bleu(list_of_references[idx], hypothesis_ce[idx])
+            round_bleu_score = round(bleu_score, 4) * 100
+            round_bleu_score_ce = round(bleu_score_ce, 4) * 100
             print("{:<20}: {}".format(opt.pred[i].split('/')[-1][:-4], " ".join(hypothesis[idx])))
             print("{:<20}: {}".format(opt.pred_ce[i].split('/')[-1][:-4], " ".join(hypothesis_ce[idx])))
+            print("BLEU: {}, BLEU_CE: {}".format(round_bleu_score, round_bleu_score_ce))
         print()
     # print(intersection)
     round_better_score = round(better_cnt/total_cnt, 4) * 100
