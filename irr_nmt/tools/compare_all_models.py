@@ -76,6 +76,7 @@ if __name__ == '__main__':
             if bleu_score_ce > bleu_score:
                 better_line.append(idx)
             idx += 1
+        better_line_list.append(better_line)
 
     intersection = None
     for better_line in better_line_list:
