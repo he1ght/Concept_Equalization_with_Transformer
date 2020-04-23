@@ -51,8 +51,8 @@ def read_list_of_words(directory, ref=False):
 
 
 def measure_bleu(ref, pred):
-    # chencherry = SmoothingFunction()
-    bleu_score = nltk.translate.bleu_score.sentence_bleu(ref, pred)  # , smoothing_function=chencherry.method4)
+    chencherry = SmoothingFunction()
+    bleu_score = nltk.translate.bleu_score.sentence_bleu(ref, pred , smoothing_function=chencherry.method4)
     return bleu_score
 
 
