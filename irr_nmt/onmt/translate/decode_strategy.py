@@ -53,10 +53,19 @@ class DecodeStrategy(object):
         done (bool): See above.
     """
 
-    def __init__(self, pad, bos, eos, batch_size, parallel_paths,
-                 min_length, block_ngram_repeat, exclusion_tokens,
-                 return_attention, max_length):
-
+    def __init__(
+        self,
+        pad,
+        bos,
+        eos,
+        batch_size,
+        parallel_paths,
+        min_length,
+        block_ngram_repeat,
+        exclusion_tokens,
+        return_attention,
+        max_length,
+    ):
         # magic indices
         self.pad = pad
         self.bos = bos
@@ -90,13 +99,16 @@ class DecodeStrategy(object):
         used to prepare necessary ingredients for decode.
         """
         if device is None:
-            device = torch.device('cpu')
+            device = torch.device("cpu")
         self.alive_seq = torch.full(
-            [self.batch_size * self.parallel_paths, 1], self.bos,
-            dtype=torch.long, device=device)
+            [self.batch_size * self.parallel_paths, 1],
+            self.bos,
+            dtype=torch.long,
+            device=device,
+        )
         self.is_finished = torch.zeros(
-            [self.batch_size, self.parallel_paths],
-            dtype=torch.uint8, device=device)
+            [self.batch_size, self.parallel_paths], dtype=torch.uint8, device=device
+        )
         return None, memory_bank, src_lengths, src_map
 
     def __len__(self):
@@ -145,8 +157,7 @@ class DecodeStrategy(object):
             # we check paths one by one
 
             current_ngram = tuple(self.alive_seq[path_idx, -n:].tolist())
-            forbidden_tokens = self.forbidden_tokens[path_idx].get(
-                current_ngram, None)
+            forbidden_tokens = self.forbidden_tokens[path_idx].get(current_ngram, None)
             if forbidden_tokens is not None:
                 log_probs[path_idx, list(forbidden_tokens)] = -10e20
 
@@ -165,11 +176,9 @@ class DecodeStrategy(object):
 
         forbidden_tokens = list()
         for path_idx, seq in zip(self.select_indices, self.alive_seq):
-
             # Reordering forbidden_tokens following beam selection
             # We rebuild a dict to ensure we get the value and not the pointer
-            forbidden_tokens.append(
-                dict(self.forbidden_tokens[path_idx]))
+            forbidden_tokens.append(dict(self.forbidden_tokens[path_idx]))
 
             # Grabing the newly selected tokens and associated ngram
             current_ngram = tuple(seq[-n:].tolist())

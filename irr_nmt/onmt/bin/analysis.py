@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 """Train models."""
+
 import traceback
 
 import torch
 
 import onmt
 import onmt.opts as opts
-from onmt.inputters.inputter import build_dataset_iter, \
-    build_dataset_iter_multiple
+from onmt.inputters.inputter import build_dataset_iter, build_dataset_iter_multiple
 from onmt.model_builder import load_test_model
 from onmt.utils.logging import init_logger, logger
 from onmt.utils.misc import set_random_seed
@@ -28,7 +28,7 @@ def analysis(opt):
 
 
 def _get_parser():
-    parser = ArgumentParser(description='analysis.py')
+    parser = ArgumentParser(description="analysis.py")
 
     opts.config_opts(parser)
     opts.model_opts(parser)
@@ -47,7 +47,7 @@ def _tally_parameters(model):
     enc = 0
     dec = 0
     for name, param in model.named_parameters():
-        if 'encoder' in name:
+        if "encoder" in name:
             enc += param.nelement()
         else:
             dec += param.nelement()
@@ -67,15 +67,15 @@ def run_single(opt, device_id, batch_queue=None, semaphore=None):
     init_logger(opt.log_file)
 
     # Build model.
-    logger.info('Loading model from %s' % opt.model)
+    logger.info("Loading model from %s" % opt.model)
     fields, model, model_opt = load_test_model(opt, opt.model)
     print(model)
     ArgumentParser.update_model_opts(model_opt)
     ArgumentParser.validate_model_opts(model_opt)
-    logger.info('Loading vocab from model at %s.' % opt.model)
+    logger.info("Loading vocab from model at %s." % opt.model)
 
     # Report src and tgt vocab sizes, including for features
-    for side in ['src', 'tgt']:
+    for side in ["src", "tgt"]:
         f = fields[side]
         try:
             f_iter = iter(f)
@@ -83,17 +83,16 @@ def run_single(opt, device_id, batch_queue=None, semaphore=None):
             f_iter = [(side, f)]
         for sn, sf in f_iter:
             if sf.use_vocab:
-                logger.info(' * %s vocab size = %d' % (sn, len(sf.vocab)))
+                logger.info(" * %s vocab size = %d" % (sn, len(sf.vocab)))
 
     n_params, enc, dec = _tally_parameters(model)
-    logger.info('encoder: %d' % enc)
-    logger.info('decoder: %d' % dec)
-    logger.info('* number of parameters: %d' % n_params)
+    logger.info("encoder: %d" % enc)
+    logger.info("decoder: %d" % dec)
+    logger.info("* number of parameters: %d" % n_params)
 
     steper = Steper()
 
-    trainer = build_trainer(
-        opt, device_id, model, fields, steper)
+    trainer = build_trainer(opt, device_id, model, fields, steper)
 
     if len(opt.data_ids) > 1:
         train_shards = []
@@ -109,15 +108,13 @@ def run_single(opt, device_id, batch_queue=None, semaphore=None):
         train_iter = build_dataset_iter(shard_base, fields, opt)
 
     if opt.gpu != -1:
-        logger.info('Starting training on GPU: %s' % opt.gpu)
+        logger.info("Starting training on GPU: %s" % opt.gpu)
     else:
-        logger.info('Starting training on CPU, could be very slow')
+        logger.info("Starting training on CPU, could be very slow")
 
     train_steps = 0
 
-    trainer.train(
-        train_iter,
-        train_steps)
+    trainer.train(train_iter, train_steps)
 
     if trainer.report_manager.tensorboard_writer is not None:
         trainer.report_manager.tensorboard_writer.close()
@@ -139,7 +136,9 @@ def build_trainer(opt, device_id, model, fields, steper, model_saver=None):
     """
 
     tgt_field = dict(fields)["tgt"].base_field
-    train_loss = onmt.utils.loss.build_loss_compute(model, tgt_field, opt, do_backward=False)
+    train_loss = onmt.utils.loss.build_loss_compute(
+        model, tgt_field, opt, do_backward=False
+    )
 
     if device_id >= 0:
         n_gpu = 1
@@ -148,11 +147,16 @@ def build_trainer(opt, device_id, model, fields, steper, model_saver=None):
         gpu_rank = 0
         n_gpu = 0
 
-
     report_manager = onmt.utils.build_report_manager(opt, gpu_rank)
-    trainer = Trainer(model, train_loss, steper,
-                      n_gpu=n_gpu, gpu_rank=gpu_rank, report_manager=report_manager,
-                      with_align=True if opt.lambda_align > 0 else False)
+    trainer = Trainer(
+        model,
+        train_loss,
+        steper,
+        n_gpu=n_gpu,
+        gpu_rank=gpu_rank,
+        report_manager=report_manager,
+        with_align=True if opt.lambda_align > 0 else False,
+    )
     return trainer
 
 
@@ -166,13 +170,23 @@ class Steper(object):
 
 
 class Trainer(object):
-
-    def __init__(self, model, train_loss, steper,
-                 trunc_size=0, shard_size=32,
-                 norm_method="sents",
-                 n_gpu=1, gpu_rank=1,
-                 report_manager=None, with_align=False, model_saver=None,
-                 average_decay=0, average_every=1, model_dtype='fp32'):
+    def __init__(
+        self,
+        model,
+        train_loss,
+        steper,
+        trunc_size=0,
+        shard_size=32,
+        norm_method="sents",
+        n_gpu=1,
+        gpu_rank=1,
+        report_manager=None,
+        with_align=False,
+        model_saver=None,
+        average_decay=0,
+        average_every=1,
+        model_dtype="fp32",
+    ):
         # Basic attributes.
         self.model = model
         self.train_loss = train_loss
@@ -198,8 +212,7 @@ class Trainer(object):
         for batch in iterator:
             batches.append(batch)
             if self.norm_method == "tokens":
-                num_tokens = batch.tgt[1:, :, 0].ne(
-                    self.train_loss.padding_idx).sum()
+                num_tokens = batch.tgt[1:, :, 0].ne(self.train_loss.padding_idx).sum()
                 normalization += num_tokens.item()
             else:
                 normalization += batch.batch_size
@@ -211,55 +224,50 @@ class Trainer(object):
 
     def _update_average(self, step):
         if self.moving_average is None:
-            copy_params = [params.detach().float()
-                           for params in self.model.parameters()]
+            copy_params = [
+                params.detach().float() for params in self.model.parameters()
+            ]
             self.moving_average = copy_params
         else:
-            average_decay = max(self.average_decay,
-                                1 - (step + 1) / (step + 10))
-            for (i, avg), cpt in zip(enumerate(self.moving_average),
-                                     self.model.parameters()):
-                self.moving_average[i] = \
-                    (1 - average_decay) * avg + \
-                    cpt.detach().float() * average_decay
+            average_decay = max(self.average_decay, 1 - (step + 1) / (step + 10))
+            for (i, avg), cpt in zip(
+                enumerate(self.moving_average), self.model.parameters()
+            ):
+                self.moving_average[i] = (
+                    1 - average_decay
+                ) * avg + cpt.detach().float() * average_decay
 
-    def train(self,
-              train_iter,
-              train_steps):
-
+    def train(self, train_iter, train_steps):
         total_stats = onmt.utils.Statistics()
         report_stats = onmt.utils.Statistics()
         self._start_report_manager(start_time=total_stats.start_time)
 
-        for i, (batches, normalization) in enumerate(
-                self._accum_batches(train_iter)):
+        for i, (batches, normalization) in enumerate(self._accum_batches(train_iter)):
             self.steper.step(batches[0].tgt.size(1))
             step = self.steper.analysis_step
 
             if self.n_gpu > 1:
-                normalization = sum(onmt.utils.distributed
-                                    .all_gather_list
-                                    (normalization))
+                normalization = sum(
+                    onmt.utils.distributed.all_gather_list(normalization)
+                )
 
             self._gradient_accumulation(
-                batches, normalization, total_stats,
-                report_stats)
+                batches, normalization, total_stats, report_stats
+            )
 
             if self.average_decay > 0 and i % self.average_every == 0:
                 self._update_average(step)
 
-            report_stats = self._maybe_report_training(
-                step, train_steps,
-                report_stats)
+            report_stats = self._maybe_report_training(step, train_steps, report_stats)
 
             if 0 < train_steps <= step:
                 break
 
         return total_stats
 
-    def _gradient_accumulation(self, true_batches, normalization, total_stats,
-                               report_stats):
-
+    def _gradient_accumulation(
+        self, true_batches, normalization, total_stats, report_stats
+    ):
         for k, batch in enumerate(true_batches):
             target_size = batch.tgt.size(0)
             # Truncated BPTT: reminder not compatible with accum > 1
@@ -268,8 +276,9 @@ class Trainer(object):
             else:
                 trunc_size = target_size
 
-            src, src_lengths = batch.src if isinstance(batch.src, tuple) \
-                else (batch.src, None)
+            src, src_lengths = (
+                batch.src if isinstance(batch.src, tuple) else (batch.src, None)
+            )
             if src_lengths is not None:
                 report_stats.n_src_words += src_lengths.sum().item()
 
@@ -278,10 +287,11 @@ class Trainer(object):
             bptt = False
             for j in range(0, target_size - 1, trunc_size):
                 # 1. Create truncated target.
-                tgt = tgt_outer[j: j + trunc_size]
+                tgt = tgt_outer[j : j + trunc_size]
 
-                outputs, attns, new_cost = self.model(src, tgt, src_lengths, bptt=bptt,
-                                                      with_align=self.with_align)
+                outputs, attns, new_cost = self.model(
+                    src, tgt, src_lengths, bptt=bptt, with_align=self.with_align
+                )
                 bptt = True
 
                 # 3. Compute loss.
@@ -293,7 +303,8 @@ class Trainer(object):
                     shard_size=self.shard_size,
                     trunc_start=j,
                     trunc_size=trunc_size,
-                    new_cost=new_cost)
+                    new_cost=new_cost,
+                )
 
                 total_stats.update(batch_stats)
                 report_stats.update(batch_stats)
@@ -330,27 +341,25 @@ class Trainer(object):
             return onmt.utils.Statistics.all_gather_stats(stat)
         return stat
 
-    def _maybe_report_training(self, step, num_steps,
-                               report_stats):
+    def _maybe_report_training(self, step, num_steps, report_stats):
         """
         Simple function to report training stats (if report_manager is set)
         see `onmt.utils.ReportManagerBase.report_training` for doc
         """
         if self.report_manager is not None:
             return self.report_manager.report_training(
-                step, num_steps, 0, report_stats,
-                multigpu=self.n_gpu > 1)
+                step, num_steps, 0, report_stats, multigpu=self.n_gpu > 1
+            )
 
-    def _report_step(self, step, train_stats=None,
-                     valid_stats=None):
+    def _report_step(self, step, train_stats=None, valid_stats=None):
         """
         Simple function to report stats (if report_manager is set)
         see `onmt.utils.ReportManagerBase.report_step` for doc
         """
         if self.report_manager is not None:
-            return self.report_manager.report_step(0,
-                step, train_stats=train_stats,
-                valid_stats=valid_stats)
+            return self.report_manager.report_step(
+                0, step, train_stats=train_stats, valid_stats=valid_stats
+            )
 
 
 if __name__ == "__main__":

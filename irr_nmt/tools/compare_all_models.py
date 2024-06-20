@@ -1,29 +1,32 @@
-
 import nltk
 from nltk.translate.bleu_score import SmoothingFunction
 import configargparse as cfargparse
 
 
 def config_opts(parser):
-    parser.add('-config', '--config', required=False,
-               is_config_file_arg=True, help='config file path')
-    parser.add('-save_config', '--save_config', required=False,
-               is_write_out_config_file_arg=True,
-               help='config file save path')
+    parser.add(
+        "-config",
+        "--config",
+        required=False,
+        is_config_file_arg=True,
+        help="config file path",
+    )
+    parser.add(
+        "-save_config",
+        "--save_config",
+        required=False,
+        is_write_out_config_file_arg=True,
+        help="config file save path",
+    )
 
 
 def compare_opts(parser):
-    group = parser.add_argument_group('Opts')
-    group.add('-ref', required=True,
-              help="")
-    group.add('-src', type=str, default="",
-              help="")
-    group.add('-pred', required=True, default=[], nargs='*', type=str,
-              help="")
-    group.add('-pred_ce', required=True, default=[], nargs='*', type=str,
-              help="")
-    group.add('-lines', default=[], nargs='*', type=int,
-              help="")
+    group = parser.add_argument_group("Opts")
+    group.add("-ref", required=True, help="")
+    group.add("-src", type=str, default="", help="")
+    group.add("-pred", required=True, default=[], nargs="*", type=str, help="")
+    group.add("-pred_ce", required=True, default=[], nargs="*", type=str, help="")
+    group.add("-lines", default=[], nargs="*", type=int, help="")
 
 
 def _get_parser():
@@ -53,14 +56,15 @@ def read_list_of_words(directory, ref=False):
 def measure_bleu(ref, pred):
     chencherry = SmoothingFunction()
     if len(pred) > 1:
-        bleu_score = nltk.translate.bleu_score.sentence_bleu(ref, pred , smoothing_function=chencherry.method4)
+        bleu_score = nltk.translate.bleu_score.sentence_bleu(
+            ref, pred, smoothing_function=chencherry.method4
+        )
     else:
         bleu_score = nltk.translate.bleu_score.sentence_bleu(ref, pred)
     return bleu_score
 
 
-if __name__ == '__main__':
-
+if __name__ == "__main__":
     parser = _get_parser()
 
     opt = parser.parse_args()
@@ -111,14 +115,32 @@ if __name__ == '__main__':
         print("No. {}".format(idx + 1))
         if sources:
             print("{:<20}: {}".format("SRC", " ".join(sources[idx])))
-        print("{:<20}: {}".format("REF"," ".join(list_of_references[idx][0])))
-        for i, (hypothesis, hypothesis_ce) in enumerate(zip(list_of_hypothesis, list_of_hypothesis_ce)):
+        print("{:<20}: {}".format("REF", " ".join(list_of_references[idx][0])))
+        for i, (hypothesis, hypothesis_ce) in enumerate(
+            zip(list_of_hypothesis, list_of_hypothesis_ce)
+        ):
             round_bleu_score = round(list_of_bleu[i][idx], 4) * 100
             round_bleu_score_ce = round(list_of_bleu_ce[i][idx], 4) * 100
-            print("{:<20}: {}".format(opt.pred[i].split('/')[-1][:-4], " ".join(hypothesis[idx])))
-            print("{:<20}: {}".format(opt.pred_ce[i].split('/')[-1][:-4], " ".join(hypothesis_ce[idx])))
-            print(" * BLEU: {:.2f}, BLEU_CE: {:.2f}".format(round_bleu_score, round_bleu_score_ce))
+            print(
+                "{:<20}: {}".format(
+                    opt.pred[i].split("/")[-1][:-4], " ".join(hypothesis[idx])
+                )
+            )
+            print(
+                "{:<20}: {}".format(
+                    opt.pred_ce[i].split("/")[-1][:-4], " ".join(hypothesis_ce[idx])
+                )
+            )
+            print(
+                " * BLEU: {:.2f}, BLEU_CE: {:.2f}".format(
+                    round_bleu_score, round_bleu_score_ce
+                )
+            )
         print()
     # print(intersection)
-    round_better_score = round(better_cnt/total_cnt, 4) * 100
-    print("Better score: {:.2f}% ({}/{})".format(round_better_score, better_cnt, total_cnt))
+    round_better_score = round(better_cnt / total_cnt, 4) * 100
+    print(
+        "Better score: {:.2f}% ({}/{})".format(
+            round_better_score, better_cnt, total_cnt
+        )
+    )

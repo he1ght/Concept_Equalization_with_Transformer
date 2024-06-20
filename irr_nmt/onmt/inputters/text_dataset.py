@@ -25,8 +25,7 @@ class TextDataReader(DataReaderBase):
             values are more or less the result of tokenizing with those
             fields.
         """
-        assert _dir is None or _dir == "", \
-            "Cannot use _dir with TextDataReader."
+        assert _dir is None or _dir == "", "Cannot use _dir with TextDataReader."
         if isinstance(sequences, str):
             sequences = DataReaderBase._read_file(sequences)
         for i, seq in enumerate(sequences):
@@ -43,8 +42,7 @@ def text_sort_key(ex):
 
 
 # mix this with partial
-def _feature_tokenize(
-        string, layer=0, tok_delim=None, feat_delim=None, truncate=None):
+def _feature_tokenize(string, layer=0, tok_delim=None, feat_delim=None, truncate=None):
     """Split apart word features (like POS/NER tags) from the tokens.
 
     Args:
@@ -123,8 +121,10 @@ class TextMultiField(RawField):
             # lengths: batch_size
             base_data, lengths = base_data
 
-        feats = [ff.process(batch_by_feat[i], device=device)
-                 for i, (_, ff) in enumerate(self.fields[1:], 1)]
+        feats = [
+            ff.process(batch_by_feat[i], device=device)
+            for i, (_, ff) in enumerate(self.fields[1:], 1)
+        ]
         levels = [base_data] + feats
         # data: seq_len x batch_size x len(self.fields)
         data = torch.stack(levels, 2)
@@ -175,19 +175,20 @@ def text_fields(**kwargs):
     eos = kwargs.get("eos", "</s>")
     truncate = kwargs.get("truncate", None)
     fields_ = []
-    feat_delim = u"￨" if n_feats > 0 else None
+    feat_delim = "￨" if n_feats > 0 else None
     for i in range(n_feats + 1):
         name = base_name + "_feat_" + str(i - 1) if i > 0 else base_name
         tokenize = partial(
-            _feature_tokenize,
-            layer=i,
-            truncate=truncate,
-            feat_delim=feat_delim)
+            _feature_tokenize, layer=i, truncate=truncate, feat_delim=feat_delim
+        )
         use_len = i == 0 and include_lengths
         feat = Field(
-            init_token=bos, eos_token=eos,
-            pad_token=pad, tokenize=tokenize,
-            include_lengths=use_len)
+            init_token=bos,
+            eos_token=eos,
+            pad_token=pad,
+            tokenize=tokenize,
+            include_lengths=use_len,
+        )
         fields_.append((name, feat))
     assert fields_[0][0] == base_name  # sanity check
     field = TextMultiField(fields_[0][0], fields_[0][1], fields_[1:])

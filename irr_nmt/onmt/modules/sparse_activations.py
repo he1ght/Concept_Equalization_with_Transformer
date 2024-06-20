@@ -41,7 +41,6 @@ def _threshold_and_support(input, dim=0):
 
 
 class SparsemaxFunction(Function):
-
     @staticmethod
     def forward(ctx, input, dim=0):
         """sparsemax: normalizing sparse transform (a la softmax)
@@ -78,7 +77,6 @@ sparsemax = SparsemaxFunction.apply
 
 
 class Sparsemax(nn.Module):
-
     def __init__(self, dim=0):
         self.dim = dim
         super(Sparsemax, self).__init__()
@@ -88,7 +86,6 @@ class Sparsemax(nn.Module):
 
 
 class LogSparsemax(nn.Module):
-
     def __init__(self, dim=0):
         self.dim = dim
         super(LogSparsemax, self).__init__()

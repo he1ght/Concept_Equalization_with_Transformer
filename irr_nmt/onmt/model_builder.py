@@ -2,6 +2,7 @@
 This file is for models creation, which consults options
 and creates each encoder and decoder accordingly.
 """
+
 import re
 import torch
 import torch.nn as nn
@@ -34,11 +35,8 @@ def build_embeddings(opt, text_field, for_encoder=True):
             opt.feat_vec_size,
             emb_dim,
             position_encoding=opt.position_encoding,
-            dropout=(opt.dropout[0] if type(opt.dropout) is list
-                     else opt.dropout),
+            dropout=(opt.dropout[0] if type(opt.dropout) is list else opt.dropout),
         )
-
-
 
     pad_indices = [f.vocab.stoi[f.pad_token] for _, f in text_field]
     word_padding_idx, feat_pad_indices = pad_indices[0], pad_indices[1:]
@@ -46,14 +44,12 @@ def build_embeddings(opt, text_field, for_encoder=True):
     num_embs = [len(f.vocab) for _, f in text_field]
     num_word_embeddings, num_feat_embeddings = num_embs[0], num_embs[1:]
 
-    fix_word_vecs = opt.fix_word_vecs_enc if for_encoder \
-        else opt.fix_word_vecs_dec
+    fix_word_vecs = opt.fix_word_vecs_enc if for_encoder else opt.fix_word_vecs_dec
 
     # try:
     if opt.bert_emb:
         return BERTEmbedding(
-            word_padding_idx=word_padding_idx,
-            fix_word_vecs=fix_word_vecs
+            word_padding_idx=word_padding_idx, fix_word_vecs=fix_word_vecs
         )
     # except Exception:
     #     pass
@@ -70,7 +66,7 @@ def build_embeddings(opt, text_field, for_encoder=True):
         word_vocab_size=num_word_embeddings,
         feat_vocab_sizes=num_feat_embeddings,
         sparse=opt.optim == "sparseadam",
-        fix_word_vecs=fix_word_vecs
+        fix_word_vecs=fix_word_vecs,
     )
     return emb
 
@@ -82,8 +78,11 @@ def build_encoder(opt, embeddings):
         opt: the option in current environment.
         embeddings (Embeddings): vocab embeddings for this encoder.
     """
-    enc_type = opt.encoder_type if opt.model_type == "text" \
-        or opt.model_type == "vec" else opt.model_type
+    enc_type = (
+        opt.encoder_type
+        if opt.model_type == "text" or opt.model_type == "vec"
+        else opt.model_type
+    )
     return str2enc[enc_type].from_opt(opt, embeddings)
 
 
@@ -94,21 +93,21 @@ def build_decoder(opt, embeddings):
         opt: the option in current environment.
         embeddings (Embeddings): vocab embeddings for this decoder.
     """
-    dec_type = "ifrnn" if opt.decoder_type == "rnn" and opt.input_feed \
-               else opt.decoder_type
+    dec_type = (
+        "ifrnn" if opt.decoder_type == "rnn" and opt.input_feed else opt.decoder_type
+    )
     return str2dec[dec_type].from_opt(opt, embeddings)
 
 
 def load_test_model(opt, model_path=None):
     if model_path is None:
         model_path = opt.models[0]
-    checkpoint = torch.load(model_path,
-                            map_location=lambda storage, loc: storage)
+    checkpoint = torch.load(model_path, map_location=lambda storage, loc: storage)
 
-    model_opt = ArgumentParser.ckpt_model_opts(checkpoint['opt'])
+    model_opt = ArgumentParser.ckpt_model_opts(checkpoint["opt"])
     ArgumentParser.update_model_opts(model_opt)
     ArgumentParser.validate_model_opts(model_opt)
-    vocab = checkpoint['vocab']
+    vocab = checkpoint["vocab"]
     if inputters.old_style_vocab(vocab):
         fields = inputters.load_old_vocab(
             vocab, opt.data_type, dynamic_dict=model_opt.copy_attn
@@ -116,8 +115,7 @@ def load_test_model(opt, model_path=None):
     else:
         fields = vocab
 
-    model = build_base_model(model_opt, fields, use_gpu(opt), checkpoint,
-                             opt.gpu)
+    model = build_base_model(model_opt, fields, use_gpu(opt), checkpoint, opt.gpu)
     if opt.fp32:
         model.float()
     model.eval()
@@ -166,8 +164,9 @@ def build_base_model(model_opt, fields, gpu, checkpoint=None, gpu_id=None):
     # Share the embedding matrix - preprocess with share_vocab required.
     if model_opt.share_embeddings:
         # src/tgt vocab should be the same if `-share_vocab` is specified.
-        assert src_field.base_field.vocab == tgt_field.base_field.vocab, \
-            "preprocess with -share_vocab if you use share_embeddings"
+        assert (
+            src_field.base_field.vocab == tgt_field.base_field.vocab
+        ), "preprocess with -share_vocab if you use share_embeddings"
 
         tgt_emb.word_lut.weight = src_emb.word_lut.weight
 
@@ -182,7 +181,13 @@ def build_base_model(model_opt, fields, gpu, checkpoint=None, gpu_id=None):
         device = torch.device("cpu")
     try:
         if model_opt.concept_equalization:
-            model = onmt.models.NMTModel(encoder, decoder, ce_layer=EqualizingLayer(model_opt.enc_rnn_size, model_opt.tgt_word_vec_size))
+            model = onmt.models.NMTModel(
+                encoder,
+                decoder,
+                ce_layer=EqualizingLayer(
+                    model_opt.enc_rnn_size, model_opt.tgt_word_vec_size
+                ),
+            )
         else:
             model = onmt.models.NMTModel(encoder, decoder)
     except Exception:
@@ -195,10 +200,9 @@ def build_base_model(model_opt, fields, gpu, checkpoint=None, gpu_id=None):
         else:
             gen_func = nn.LogSoftmax(dim=-1)
         generator = nn.Sequential(
-            nn.Linear(model_opt.dec_rnn_size,
-                      len(fields["tgt"].base_field.vocab)),
+            nn.Linear(model_opt.dec_rnn_size, len(fields["tgt"].base_field.vocab)),
             Cast(torch.float32),
-            gen_func
+            gen_func,
         )
         if model_opt.share_decoder_embeddings:
             generator[0].weight = decoder.embeddings.word_lut.weight
@@ -212,18 +216,15 @@ def build_base_model(model_opt, fields, gpu, checkpoint=None, gpu_id=None):
     if checkpoint is not None:
         # This preserves backward-compat for models using customed layernorm
         def fix_key(s):
-            s = re.sub(r'(.*)\.layer_norm((_\d+)?)\.b_2',
-                       r'\1.layer_norm\2.bias', s)
-            s = re.sub(r'(.*)\.layer_norm((_\d+)?)\.a_2',
-                       r'\1.layer_norm\2.weight', s)
+            s = re.sub(r"(.*)\.layer_norm((_\d+)?)\.b_2", r"\1.layer_norm\2.bias", s)
+            s = re.sub(r"(.*)\.layer_norm((_\d+)?)\.a_2", r"\1.layer_norm\2.weight", s)
             return s
 
-        checkpoint['model'] = {fix_key(k): v
-                               for k, v in checkpoint['model'].items()}
+        checkpoint["model"] = {fix_key(k): v for k, v in checkpoint["model"].items()}
         # end of patch for backward compatibility
 
-        model.load_state_dict(checkpoint['model'], strict=False)
-        generator.load_state_dict(checkpoint['generator'], strict=False)
+        model.load_state_dict(checkpoint["model"], strict=False)
+        generator.load_state_dict(checkpoint["generator"], strict=False)
     else:
         if model_opt.param_init != 0.0:
             for p in model.parameters():
@@ -238,22 +239,24 @@ def build_base_model(model_opt, fields, gpu, checkpoint=None, gpu_id=None):
                 if p.dim() > 1:
                     xavier_uniform_(p)
 
-        if hasattr(model.encoder, 'embeddings'):
+        if hasattr(model.encoder, "embeddings"):
             model.encoder.embeddings.load_pretrained_vectors(
-                model_opt.pre_word_vecs_enc)
-        if hasattr(model.decoder, 'embeddings'):
+                model_opt.pre_word_vecs_enc
+            )
+        if hasattr(model.decoder, "embeddings"):
             model.decoder.embeddings.load_pretrained_vectors(
-                model_opt.pre_word_vecs_dec)
+                model_opt.pre_word_vecs_dec
+            )
 
     model.generator = generator
     model.to(device)
-    if model_opt.model_dtype == 'fp16' and model_opt.optim == 'fusedadam':
+    if model_opt.model_dtype == "fp16" and model_opt.optim == "fusedadam":
         model.half()
     return model
 
 
 def build_model(model_opt, opt, fields, checkpoint):
-    logger.info('Building model...')
+    logger.info("Building model...")
     model = build_base_model(model_opt, fields, use_gpu(opt), checkpoint)
     logger.info(model)
     return model
@@ -270,13 +273,14 @@ class EqualizingLayer(nn.Module):
             elif ce_type == 1:
                 hidden_unit = 250
                 self.layer = torch.nn.Sequential()
-                self.layer.add_module("Equalizing Layer 1", torch.nn.Linear(input_size, hidden_unit))
-                self.layer.add_module("Equalizing Layer 2", torch.nn.Linear(hidden_unit, output_size))
+                self.layer.add_module(
+                    "Equalizing Layer 1", torch.nn.Linear(input_size, hidden_unit)
+                )
+                self.layer.add_module(
+                    "Equalizing Layer 2", torch.nn.Linear(hidden_unit, output_size)
+                )
         except Exception:
             self.layer = torch.nn.Linear(input_size, output_size)
-
-
-
 
     def forward(self, c_s):
         return self.layer(c_s)

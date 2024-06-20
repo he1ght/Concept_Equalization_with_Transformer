@@ -18,9 +18,12 @@ def read_list_of_words(directory, ref=False):
     f.close()
     return list_of_words
 
+
 def measure_bleu(ref, pred):
     chencherry = SmoothingFunction()
-    bleu_score = nltk.translate.bleu_score.sentence_bleu(ref, pred)#, smoothing_function=chencherry.method4)
+    bleu_score = nltk.translate.bleu_score.sentence_bleu(
+        ref, pred
+    )  # , smoothing_function=chencherry.method4)
     return bleu_score
 
 
@@ -43,7 +46,8 @@ def measure_prec(ref, pred):
         prec_score = 0
     return prec_score
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     list_of_references = read_list_of_words(sys.argv[1], ref=True)
     hypothesis = read_list_of_words(sys.argv[2])
     hypothesis_ce = read_list_of_words(sys.argv[3])
@@ -53,7 +57,7 @@ if __name__ == '__main__':
     ce_better_cnt = 0
     worse_cnt = 0
 
-    for src, hyp, hyp_ce in zip (list_of_references, hypothesis, hypothesis_ce):
+    for src, hyp, hyp_ce in zip(list_of_references, hypothesis, hypothesis_ce):
         bleu_score = measure_bleu(src, hyp)
         bleu_score_ce = measure_bleu(src, hyp_ce)
         # prec_score = measure_prec(src, hyp)
@@ -72,7 +76,7 @@ if __name__ == '__main__':
             print()
         elif bleu_score_ce < bleu_score:
             worse_cnt += 1
-    round_better_score = round(ce_better_cnt/total_cnt, 4) * 100
+    round_better_score = round(ce_better_cnt / total_cnt, 4) * 100
     print("Better score: {}%".format(round_better_score))
-    round_worse_score = round(worse_cnt/total_cnt, 4) * 100
+    round_worse_score = round(worse_cnt / total_cnt, 4) * 100
     print("Worse score: {}%".format(round_worse_score))

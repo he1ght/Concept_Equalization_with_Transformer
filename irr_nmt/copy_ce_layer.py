@@ -1,38 +1,77 @@
 #!/usr/bin/env python
 """Train models."""
+
 from onmt.utils import Optimizer
 
 
 def config_opts(parser):
-    parser.add('-config', '--config', required=False,
-               is_config_file_arg=True, help='config file path')
-    parser.add('-save_config', '--save_config', required=False,
-               is_write_out_config_file_arg=True,
-               help='config file save path')
+    parser.add(
+        "-config",
+        "--config",
+        required=False,
+        is_config_file_arg=True,
+        help="config file path",
+    )
+    parser.add(
+        "-save_config",
+        "--save_config",
+        required=False,
+        is_write_out_config_file_arg=True,
+        help="config file save path",
+    )
 
 
 def copy_ce_layer_opts(parser):
-    """ Training and saving options """
+    """Training and saving options"""
 
-    group = parser.add_argument_group('General')
-    group.add('--train_from', '-train_from', default='', type=str, required=True,
-              help="If training from a checkpoint then this is the "
-                   "path to the pretrained model's state_dict.")
-    group.add('--ce_model', '-ce_model', default='', type=str, required=True,
-              help="If training from a checkpoint then this is the "
-                   "path to the pretrained model's state_dict.")
-    group.add('--save_model', '-save_model', default='model',
-              help="Model filename (the model will be saved as "
-                   "<save_model>_N.pt where N is the number "
-                   "of steps")
-    group.add('--reset_optim', '-reset_optim', default='none',
-              choices=['none', 'all', 'states', 'keep_states'],
-              help="Optimization resetter when train_from.")
-    group.add('--model_dtype', '-model_dtype', default='fp32',
-              choices=['fp32', 'fp16'],
-              help='Data type of the model.')
-    group.add('--keep_checkpoint', '-keep_checkpoint', type=int, default=-1,
-              help="Keep X checkpoints (negative: keep all)")
+    group = parser.add_argument_group("General")
+    group.add(
+        "--train_from",
+        "-train_from",
+        default="",
+        type=str,
+        required=True,
+        help="If training from a checkpoint then this is the "
+        "path to the pretrained model's state_dict.",
+    )
+    group.add(
+        "--ce_model",
+        "-ce_model",
+        default="",
+        type=str,
+        required=True,
+        help="If training from a checkpoint then this is the "
+        "path to the pretrained model's state_dict.",
+    )
+    group.add(
+        "--save_model",
+        "-save_model",
+        default="model",
+        help="Model filename (the model will be saved as "
+        "<save_model>_N.pt where N is the number "
+        "of steps",
+    )
+    group.add(
+        "--reset_optim",
+        "-reset_optim",
+        default="none",
+        choices=["none", "all", "states", "keep_states"],
+        help="Optimization resetter when train_from.",
+    )
+    group.add(
+        "--model_dtype",
+        "-model_dtype",
+        default="fp32",
+        choices=["fp32", "fp16"],
+        help="Data type of the model.",
+    )
+    group.add(
+        "--keep_checkpoint",
+        "-keep_checkpoint",
+        type=int,
+        default=-1,
+        help="Keep X checkpoints (negative: keep all)",
+    )
 
 
 # !/usr/bin/env python
@@ -55,25 +94,22 @@ def _check_save_model_path(opt):
 
 
 def copy_ce_layer(opt):
-    checkpoint = torch.load(opt.train_from,
-                            map_location=lambda storage, loc: storage)
+    checkpoint = torch.load(opt.train_from, map_location=lambda storage, loc: storage)
     model_opt = ArgumentParser.ckpt_model_opts(checkpoint["opt"])
     ArgumentParser.update_model_opts(model_opt)
     ArgumentParser.validate_model_opts(model_opt)
 
-    checkpoint_ce = torch.load(opt.ce_model,
-                            map_location=lambda storage, loc: storage)
+    checkpoint_ce = torch.load(opt.ce_model, map_location=lambda storage, loc: storage)
     model_opt_ce = ArgumentParser.ckpt_model_opts(checkpoint_ce["opt"])
     ArgumentParser.update_model_opts(model_opt_ce)
     ArgumentParser.validate_model_opts(model_opt_ce)
 
-    vocab = checkpoint['vocab']
+    vocab = checkpoint["vocab"]
 
     # check for code where vocab is saved instead of fields
     # (in the future this will be done in a smarter way)
     if old_style_vocab(vocab):
-        fields = load_old_vocab(
-            vocab, 'text', dynamic_dict=False)
+        fields = load_old_vocab(vocab, "text", dynamic_dict=False)
     else:
         fields = vocab
 
@@ -94,7 +130,7 @@ def copy_ce_layer(opt):
 
 
 def _get_parser():
-    parser = ArgumentParser(description='copy_ce_layer_opts.py')
+    parser = ArgumentParser(description="copy_ce_layer_opts.py")
 
     config_opts(parser)
     copy_ce_layer_opts(parser)

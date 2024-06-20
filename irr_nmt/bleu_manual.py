@@ -9,19 +9,19 @@ def bleu_cnt(ans, tst):
             gram_table[0][e] = 1
 
         if len(ans) > i + 1:
-            e = ' '.join(ans[i:i + 2])
+            e = " ".join(ans[i : i + 2])
             if e in gram_table[1]:
                 gram_table[1][e] += 1
             else:
                 gram_table[1][e] = 1
         if len(ans) > i + 2:
-            e = ' '.join(ans[i:i + 3])
+            e = " ".join(ans[i : i + 3])
             if e in gram_table[2]:
                 gram_table[2][e] += 1
             else:
                 gram_table[2][e] = 1
         if len(ans) > i + 3:
-            e = ' '.join(ans[i:i + 4])
+            e = " ".join(ans[i : i + 4])
             if e in gram_table[3]:
                 gram_table[3][e] += 1
             else:
@@ -36,21 +36,21 @@ def bleu_cnt(ans, tst):
             else:
                 pred_cnt[0][e] = 1
         if len(tst) > i + 1:
-            ng = ' '.join(tst[i:i + 2])
+            ng = " ".join(tst[i : i + 2])
             if ng in gram_table[1]:
                 if ng in pred_cnt[1]:
                     pred_cnt[1][ng] = min(pred_cnt[1][ng] + 1, gram_table[1][ng])
                 else:
                     pred_cnt[1][ng] = 1
         if len(tst) > i + 2:
-            ng = ' '.join(tst[i:i + 3])
+            ng = " ".join(tst[i : i + 3])
             if ng in gram_table[2]:
                 if ng in pred_cnt[2]:
                     pred_cnt[2][ng] = min(pred_cnt[2][ng] + 1, gram_table[2][ng])
                 else:
                     pred_cnt[2][ng] = 1
         if len(tst) > i + 3:
-            ng = ' '.join(tst[i:i + 4])
+            ng = " ".join(tst[i : i + 4])
             if ng in gram_table[3]:
                 if ng in pred_cnt[3]:
                     pred_cnt[3][ng] = min(pred_cnt[3][ng] + 1, gram_table[3][ng])
@@ -98,7 +98,7 @@ def correct_bleu(ans_list, tst_list):
             if ngram_cnt[i] == 0:
                 ind_bleu[i] = 1.0
             else:
-                ind_bleu[i] = 1.0 / (ngram_cnt[i] * 2 ** k)
+                ind_bleu[i] = 1.0 / (ngram_cnt[i] * 2**k)
                 k += 1
         else:
             ind_bleu[i] = pred_cnt[i] / (ngram_cnt[i] * 1.0)
@@ -112,19 +112,20 @@ def correct_bleu(ans_list, tst_list):
     return ind_bleu, cum_bleu
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # print(correct_bleu([['hi'], ['it is a tree']], [['hi'], ["it's a tree"]]))
     # a = input("1 >> ")
     # b = input("2 >> ")
     import sys
-    with open(sys.argv[1], 'r', encoding='utf8') as af:
+
+    with open(sys.argv[1], "r", encoding="utf8") as af:
         pred_sents = af.readlines()
         for s in pred_sents:
             s.replace("\n", "")
         # print(a)
     print("A read done. Line: {}".format(len(pred_sents)))
 
-    with open(sys.argv[2], 'r', encoding='utf8') as bf:
+    with open(sys.argv[2], "r", encoding="utf8") as bf:
         true_sents = bf.readlines()
         for s in true_sents:
             s.replace("\n", "")

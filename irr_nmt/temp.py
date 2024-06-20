@@ -2,7 +2,7 @@ from tqdm import tqdm
 from emb_statistics import get_stat
 from pytorch_pretrained_bert import BertModel
 
-model = BertModel.from_pretrained('bert-base-multilingual-cased')
+model = BertModel.from_pretrained("bert-base-multilingual-cased")
 model.eval()
 bert_emb = model.embeddings
 

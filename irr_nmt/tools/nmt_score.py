@@ -18,9 +18,12 @@ def read_list_of_words(directory, ref=False):
     f.close()
     return list_of_words
 
+
 def measure_bleu(ref, pred):
     chencherry = SmoothingFunction()
-    bleu_score = nltk.translate.bleu_score.corpus_bleu(ref, pred, smoothing_function=chencherry.method4)
+    bleu_score = nltk.translate.bleu_score.corpus_bleu(
+        ref, pred, smoothing_function=chencherry.method4
+    )
     return bleu_score
 
 
@@ -43,7 +46,8 @@ def measure_prec(ref, pred):
         prec_score = 0
     return prec_score
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     list_of_references = read_list_of_words(sys.argv[1], ref=True)
     hypothesis = read_list_of_words(sys.argv[2])
     # list_of_references = [references]
@@ -52,5 +56,5 @@ if __name__ == '__main__':
     prec_score = measure_prec(list_of_references, hypothesis)
     round_bleu_score = round(bleu_score, 4) * 100
     round_prec_score = round(prec_score, 4) * 100
-    print("Prec.: {}".format(round_prec_score), end=' | ')
+    print("Prec.: {}".format(round_prec_score), end=" | ")
     print("BLEU : {}".format(round_bleu_score))

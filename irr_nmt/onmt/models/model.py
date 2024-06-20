@@ -1,4 +1,5 @@
-""" Onmt NMT Model base class definition """
+"""Onmt NMT Model base class definition"""
+
 import torch
 import torch.nn as nn
 
@@ -49,11 +50,13 @@ class NMTModel(nn.Module):
 
         if bptt is False:
             self.decoder.init_state(src, memory_bank, enc_state)
-        dec_out, attns = self.decoder(dec_in, memory_bank,
-                                      memory_lengths=lengths,
-                                      with_align=with_align)
+        dec_out, attns = self.decoder(
+            dec_in, memory_bank, memory_lengths=lengths, with_align=with_align
+        )
         if self.ce_layer:
-            new_cost = self.get_distance(torch.sum(memory_bank, 0), self.decoder.embeddings(dec_in))
+            new_cost = self.get_distance(
+                torch.sum(memory_bank, 0), self.decoder.embeddings(dec_in)
+            )
 
         return dec_out, attns, new_cost
 

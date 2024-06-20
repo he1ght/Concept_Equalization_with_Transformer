@@ -49,8 +49,7 @@ def sample_with_temperature(logits, sampling_temp, keep_topk):
             ignore = torch.lt(logits, kth_best)
             logits = logits.masked_fill(ignore, -10000)
 
-        dist = torch.distributions.Multinomial(
-            logits=logits, total_count=1)
+        dist = torch.distributions.Multinomial(logits=logits, total_count=1)
         topk_ids = torch.argmax(dist.sample(), dim=1, keepdim=True)
         topk_scores = logits.gather(dim=1, index=topk_ids)
     return topk_ids, topk_scores
@@ -80,13 +79,33 @@ class GreedySearch(DecodeStrategy):
             :func:`~onmt.translate.greedy_search.sample_with_temperature()`.
     """
 
-    def __init__(self, pad, bos, eos, batch_size, min_length,
-                 block_ngram_repeat, exclusion_tokens, return_attention,
-                 max_length, sampling_temp, keep_topk):
+    def __init__(
+        self,
+        pad,
+        bos,
+        eos,
+        batch_size,
+        min_length,
+        block_ngram_repeat,
+        exclusion_tokens,
+        return_attention,
+        max_length,
+        sampling_temp,
+        keep_topk,
+    ):
         assert block_ngram_repeat == 0
         super(GreedySearch, self).__init__(
-            pad, bos, eos, batch_size, 1, min_length, block_ngram_repeat,
-            exclusion_tokens, return_attention, max_length)
+            pad,
+            bos,
+            eos,
+            batch_size,
+            1,
+            min_length,
+            block_ngram_repeat,
+            exclusion_tokens,
+            return_attention,
+            max_length,
+        )
         self.sampling_temp = sampling_temp
         self.keep_topk = keep_topk
         self.topk_scores = None
@@ -103,12 +122,13 @@ class GreedySearch(DecodeStrategy):
             device = mb_device
 
         self.memory_lengths = src_lengths
-        super(GreedySearch, self).initialize(
-            memory_bank, src_lengths, src_map, device)
+        super(GreedySearch, self).initialize(memory_bank, src_lengths, src_map, device)
         self.select_indices = torch.arange(
-            self.batch_size, dtype=torch.long, device=device)
+            self.batch_size, dtype=torch.long, device=device
+        )
         self.original_batch_idx = torch.arange(
-            self.batch_size, dtype=torch.long, device=device)
+            self.batch_size, dtype=torch.long, device=device
+        )
         return fn_map_state, memory_bank, self.memory_lengths, src_map
 
     @property
@@ -135,7 +155,8 @@ class GreedySearch(DecodeStrategy):
         self.ensure_min_length(log_probs)
         self.block_ngram_repeats(log_probs)
         topk_ids, self.topk_scores = sample_with_temperature(
-            log_probs, self.sampling_temp, self.keep_topk)
+            log_probs, self.sampling_temp, self.keep_topk
+        )
 
         self.is_finished = topk_ids.eq(self.eos)
 
@@ -156,8 +177,10 @@ class GreedySearch(DecodeStrategy):
             self.scores[b_orig].append(self.topk_scores[b, 0])
             self.predictions[b_orig].append(self.alive_seq[b, 1:])
             self.attention[b_orig].append(
-                self.alive_attn[:, b, :self.memory_lengths[b]]
-                if self.alive_attn is not None else [])
+                self.alive_attn[:, b, : self.memory_lengths[b]]
+                if self.alive_attn is not None
+                else []
+            )
         self.done = self.is_finished.all()
         if self.done:
             return
